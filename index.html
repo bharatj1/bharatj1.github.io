@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bharat Jagwani</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    height:100svh;overflow:hidden;
+    background:url("assets/bg.jpg") center/cover no-repeat fixed;
+    display:flex;align-items:center;justify-content:center;
+    font-family:system-ui,-apple-system,Poppins,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    color:#fff;
+  }
+
+  .card{
+    width:min(92vw,380px);
+    height:min(92vh,720px);
+    max-height:640px;
+    background:rgba(0,0,0,0.10);
+    border:1px solid rgba(255,255,255,.15);
+    border-radius:22px;
+    backdrop-filter:blur(10px);
+    box-shadow:0 18px 60px rgba(0,0,0,.45);
+    padding:16px;
+    display:grid;
+    grid-template-rows:auto auto auto auto 1fr auto;
+    gap:10px;
+    text-align:center;
+  }
+
+  .avatar{width:110px;height:110px;margin:0 auto;border-radius:50%;overflow:hidden;
+          border:2px solid rgba(255,255,255,.45);box-shadow:0 10px 26px rgba(0,0,0,.45)}
+  .avatar img{width:100%;height:100%;object-fit:cover}
+  h1{font-size:22px;font-weight:700;margin-top:6px}
+  h2{font-size:12.5px;color:#d3d6da;letter-spacing:.6px}
+
+  .icons{display:flex;justify-content:center;gap:12px}
+  .icons a{width:36px;height:36px;border-radius:999px;display:grid;place-items:center;
+    background:rgba(0,0,0,.30);border:1px solid rgba(255,255,255,.15);
+    transition:transform .18s, box-shadow .25s;color:#fff;font-size:16px}
+  .icons a:hover{transform:translateY(-2px);box-shadow:0 0 10px rgba(255,255,255,.15)}
+
+  .featured .label{font-size:12px;color:#cfd1d6;margin-bottom:6px}
+  .news{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+  .chip{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:12px;
+    background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.15);
+    font-size:12.5px;text-decoration:none;color:#fff;
+    transition:transform .15s, box-shadow .2s}
+  .chip i{font-size:14px}
+  .chip:hover{transform:translateY(-2px);box-shadow:0 0 10px rgba(255,255,255,.12)}
+
+  .links{display:flex;flex-direction:column;gap:8px;overflow:auto;scrollbar-width:none}
+  .links::-webkit-scrollbar{display:none}
+  .btn{display:flex;align-items:center;justify-content:space-between;
+    padding:12px 14px;border-radius:14px;
+    background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 8px 18px rgba(0,0,0,.35);
+    transition:transform .18s, box-shadow .25s;text-decoration:none;color:#fff}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 0 12px rgba(255,255,255,.12)}
+  .left{display:flex;align-items:center;gap:10px;text-align:left}
+  .left i{font-size:18px;width:20px;text-align:center}
+  .label{font-size:14px;font-weight:650;line-height:1}
+  .sub{font-size:11px;color:#cbd0d6}
+  .chev{opacity:.7}
+  footer{font-size:11px;color:#cdd1d6}
+
+  /* Popup styling */
+  .popup{
+    position:fixed;inset:0;background:rgba(0,0,0,0.7);
+    display:flex;align-items:center;justify-content:center;z-index:100;display:none;
+  }
+  .popup-content{
+    background:rgba(15,15,15,0.9);
+    padding:20px 25px;
+    border-radius:16px;
+    text-align:center;
+    width:85%;max-width:320px;
+    box-shadow:0 0 20px rgba(255,255,255,0.15);
+  }
+  .popup-content h3{margin-bottom:10px;font-size:18px;font-weight:600}
+  .popup-content p{font-size:13px;color:#ccc;margin-bottom:14px}
+  .popup-content a{
+    display:inline-block;background:#0078ff;color:#fff;
+    padding:8px 16px;border-radius:8px;text-decoration:none;font-size:13px;
+    transition:opacity .2s}
+  .popup-content a:hover{opacity:.8}
+  .popup-content button{
+    margin-top:12px;background:none;border:none;color:#aaa;
+    font-size:12px;cursor:pointer
+  }
+
+  @media (max-height:780px){.card{width:350px;padding:14px}}
+  @media (max-height:700px){.card{width:330px;padding:12px;max-height:620px}}
+</style>
+</head>
+
+<body>
+<section class="card">
+  <div class="avatar"><img src="assets/bharat.jpg" alt="Bharat Jagwani"></div>
+  <div>
+    <h1>Bharat Jagwani</h1>
+    <h2>VICE PRESIDENT – PROGRAM &amp; LEADERSHIP</h2>
+  </div>
+
+  <div class="icons">
+    <a href="tel:+919920906277"><i class="fa-solid fa-phone"></i></a>
+    <a href="https://instagram.com/brat_board" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+    <a href="https://instagram.com/brat_ology" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+    <a href="https://wa.me/919920906277?text=Hi%20Bharat" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+    <a href="https://www.linkedin.com/in/bharat-jagwani" target="_blank"><i class="fa-brands fa-linkedin"></i></a>
+  </div>
+
+  <div class="featured">
+    <div class="label">Featured In News</div>
+    <div class="news">
+      <a class="chip" href="https://timesofindia.indiatimes.com/life-style/spotlight/this-mumbaikars-making-a-point-with-his-witty-signs/articleshow/88296415.cms" target="_blank"><i class="fa-solid fa-newspaper"></i> Times of India</a>
+      <a class="chip" href="https://www.whatshot.in/mumbai/mumbai-dude-with-sign-raising-words-one-board-at-a-time-c-30116" target="_blank"><i class="fa-solid fa-fire-flame-curved"></i> Whatshot Mumbai</a>
+    </div>
+  </div>
+
+  <nav class="links">
+    <a class="btn" href="https://wa.me/919920906277?text=Hi%20Bharat" target="_blank">
+      <span class="left"><i class="fa-brands fa-whatsapp"></i><span><div class="label">WhatsApp</div><div class="sub">Message me instantly</div></span></span>
+      <span class="chev">›</span>
+    </a>
+
+    <a class="btn" href="https://instagram.com/brat_board" target="_blank">
+      <span class="left"><i class="fa-brands fa-instagram"></i><span><div class="label">Instagram — brat_board</div><div class="sub">Public Page</div></span></span>
+      <span class="chev">›</span>
+    </a>
+
+    <a class="btn" href="https://instagram.com/brat_ology" target="_blank">
+      <span class="left"><i class="fa-brands fa-instagram"></i><span><div class="label">Instagram — brat_ology</div><div class="sub">Personal</div></span></span>
+      <span class="chev">›</span>
+    </a>
+
+    <a class="btn" href="https://www.linkedin.com/in/bharat-jagwani" target="_blank">
+      <span class="left"><i class="fa-brands fa-linkedin"></i><span><div class="label">LinkedIn</div><div class="sub">View Profile</div></span></span>
+      <span class="chev">›</span>
+    </a>
+
+    <a class="btn" href="#" onclick="return gateLocation();">
+      <span class="left"><i class="fa-solid fa-lock"></i><span><div class="label">My Location</div><div class="sub">Passcode required</div></span></span>
+      <span class="chev">›</span>
+    </a>
+  </nav>
+
+  <footer>© <span id="yr"></span> Bharat Jagwani</footer>
+</section>
+
+<!-- Popup -->
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <h3>Bharat's Location</h3>
+    <p>A104-Jeevan Jyoti Society Santacruz West, MSEB Road,<br>next to Milan International Hotel, Mumbai</p>
+    <a href="https://maps.app.goo.gl/JQ85wrLcpXm7M4wu9" target="_blank">📍 Take me to Google Maps</a>
+    <br>
+    <button onclick="closePopup()">Close</button>
+  </div>
+</div>
+
+<script>
+  document.getElementById('yr').textContent=new Date().getFullYear();
+
+  function gateLocation(){
+    const code=prompt("Enter passcode:");
+    if(code==="bkjbkj"){
+      document.getElementById('popup').style.display='flex';
+    }else if(code!==null){
+      alert("Incorrect passcode.");
+    }
+    return false;
+  }
+
+  function closePopup(){
+    document.getElementById('popup').style.display='none';
+  }
+</script>
+</body>
+</html>
