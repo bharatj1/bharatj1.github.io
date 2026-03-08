@@ -21,6 +21,8 @@
   --gold:        #f0b429;
   --gold-glow:   rgba(240,180,41,0.20);
   --gold-dim:    rgba(240,180,41,0.10);
+  --teal:        #0d9488;
+  --teal-glow:   rgba(13,148,136,0.18);
   --card-bg:     rgba(255,255,255,0.042);
   --card-border: rgba(255,255,255,0.09);
   --muted:       rgba(255,255,255,0.42);
@@ -42,9 +44,9 @@ body {
   filter: blur(90px); opacity: 0.32;
   animation: drift linear infinite;
 }
-.blob-1 { width: 560px; height: 560px; background: #4a1080; top: -18%; left: -12%; animation-duration: 22s; }
-.blob-2 { width: 420px; height: 420px; background: #0a3f70; bottom: -14%; right: -8%; animation-duration: 28s; animation-delay: -10s; }
-.blob-3 { width: 320px; height: 320px; background: #0b7a6a; bottom: 18%; left: 28%; animation-duration: 19s; animation-delay: -5s; }
+.blob-1 { width: 560px; height: 560px; background: #062e28; top: -18%; left: -12%; animation-duration: 22s; }
+.blob-2 { width: 420px; height: 420px; background: #06122a; bottom: -14%; right: -8%; animation-duration: 28s; animation-delay: -10s; }
+.blob-3 { width: 340px; height: 340px; background: #2d1000; bottom: 18%; left: 28%; animation-duration: 19s; animation-delay: -5s; }
 
 @keyframes drift {
   0%   { transform: translate(0px, 0px)   scale(1);    }
@@ -71,10 +73,14 @@ body {
   padding: 26px 20px 20px;
   display: flex; flex-direction: column; gap: 18px;
   text-align: center;
-  animation: cardIn 0.75s cubic-bezier(0.16,1,0.3,1) both;
+  animation: cardIn 0.75s cubic-bezier(0.16,1,0.3,1) both, cardBreathe 7s 1.2s ease-in-out infinite;
   transform-style: preserve-3d;
   will-change: transform;
   transition: transform 0.12s ease;
+}
+@keyframes cardBreathe {
+  0%,100% { box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset, 0 32px 80px rgba(0,0,0,0.65), 0 0 0px var(--teal-glow); }
+  50%     { box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 32px 80px rgba(0,0,0,0.65), 0 0 55px var(--teal-glow); }
 }
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(36px) scale(0.95); }
@@ -89,17 +95,22 @@ body {
 }
 .avatar-ring {
   position: absolute; inset: -4px; border-radius: 50%;
-  background: conic-gradient(from 0deg, var(--gold), #f97316, #ec4899, #7c3aed, #2563eb, var(--gold));
-  animation: spin 4s linear infinite;
+  background: conic-gradient(from 0deg, var(--gold), #c8860a, var(--teal), #14b8a6, var(--gold));
+  animation: spin 5s linear infinite;
 }
 .avatar-mask {
   position: absolute; inset: 3px; border-radius: 50%;
   background: #06060f; overflow: hidden;
 }
-.avatar-mask img {
+/* Slideshow */
+.avatar-mask .slide {
+  position: absolute; inset: 0;
   width: 100%; height: 100%; object-fit: cover;
   border-radius: 50%;
+  transition: opacity 1.8s ease;
+  opacity: 0;
 }
+.avatar-mask .slide.active { opacity: 1; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* ─── Identity ─────────────────────────────────── */
@@ -315,6 +326,17 @@ footer {
 .popup-content a:hover { opacity: 0.85; }
 .popup-content button { margin-top: 12px; background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; font-family: inherit; }
 
+/* ─── Ripple ───────────────────────────────────── */
+@keyframes ripple {
+  to { transform: scale(3); opacity: 0; }
+}
+.ripple-dot {
+  position: absolute; border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  transform: scale(0); pointer-events: none;
+  animation: ripple 0.55s ease forwards;
+}
+
 /* ─── Responsive ───────────────────────────────── */
 @media (max-height: 700px) {
   .card { padding: 18px 16px; gap: 13px; }
@@ -347,7 +369,8 @@ footer {
   <div class="avatar-wrap">
     <div class="avatar-ring"></div>
     <div class="avatar-mask">
-      <img src="assets/bharat.jpg" alt="Bharat Jagwani" loading="eager" decoding="async" />
+      <img class="slide active" src="assets/bharat.jpg"  alt="Bharat Jagwani" loading="eager" decoding="async" />
+      <img class="slide"        src="assets/bharat2.jpg" alt="Bharat Jagwani" loading="lazy"  decoding="async" />
     </div>
   </div>
 
@@ -499,14 +522,14 @@ setInterval(updateTime, 10000);
   let W = canvas.width = window.innerWidth;
   let H = canvas.height = window.innerHeight;
 
-  const COUNT = 55;
+  const COUNT = 70;
   const dots = Array.from({ length: COUNT }, () => ({
     x: Math.random() * W,
     y: Math.random() * H,
-    r: Math.random() * 1.3 + 0.4,
-    dx: (Math.random() - 0.5) * 0.25,
-    dy: (Math.random() - 0.5) * 0.25,
-    a: Math.random() * 0.35 + 0.08,
+    r: Math.random() * 1.5 + 0.4,
+    dx: (Math.random() - 0.5) * 0.45,
+    dy: (Math.random() - 0.5) * 0.45,
+    a: Math.random() * 0.4 + 0.08,
   }));
 
   function draw() {
@@ -555,6 +578,31 @@ setInterval(updateTime, 10000);
   // Touch: no tilt on mobile
   card.addEventListener('touchstart', resetTilt, { passive: true });
 })();
+
+/* ── Photo slideshow ── */
+(function () {
+  const slides = document.querySelectorAll('.avatar-mask .slide');
+  if (slides.length < 2) return;
+  let cur = 0;
+  setInterval(() => {
+    slides[cur].classList.remove('active');
+    cur = (cur + 1) % slides.length;
+    slides[cur].classList.add('active');
+  }, 15000);
+})();
+
+/* ── Button ripple ── */
+document.querySelectorAll('.btn').forEach(btn => {
+  btn.addEventListener('pointerdown', function (e) {
+    const r    = this.getBoundingClientRect();
+    const size = Math.max(r.width, r.height);
+    const dot  = document.createElement('span');
+    dot.className = 'ripple-dot';
+    dot.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-r.left-size/2}px;top:${e.clientY-r.top-size/2}px`;
+    this.appendChild(dot);
+    setTimeout(() => dot.remove(), 560);
+  });
+});
 
 /* ── Passcode modal ── */
 function openPasscodeModal() {
