@@ -4,245 +4,462 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Bharat Jagwani</title>
-<meta name="description" content="Bharat Jagwani – Vice President, Program & Leadership. Based in Mumbai. Connect via WhatsApp, Instagram, or LinkedIn." />
+<meta name="description" content="Bharat Jagwani – Vice President, Program & Leadership. Mumbai. Featured in Times of India & Whatshot Mumbai." />
 <meta property="og:title" content="Bharat Jagwani" />
-<meta property="og:description" content="Vice President – Program & Leadership. Connect with Bharat on WhatsApp, Instagram, or LinkedIn." />
+<meta property="og:description" content="Vice President – Program & Leadership. Mumbai, India." />
 <meta property="og:image" content="assets/bharat.jpg" />
 <meta property="og:type" content="website" />
+<meta name="theme-color" content="#06060f" />
 <link rel="icon" href="assets/bharat.jpg" type="image/jpeg" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    height:100svh;overflow:hidden;
-    background:#1a1a2e url("assets/bg.jpg") center/cover no-repeat fixed;
-    display:flex;align-items:center;justify-content:center;
-    font-family:system-ui,-apple-system,Poppins,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    color:#fff;
-  }
+/* ─── Reset & Base ─────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  @keyframes fadeSlideIn{
-    from{opacity:0;transform:translateY(18px) scale(.97)}
-    to{opacity:1;transform:translateY(0) scale(1)}
-  }
+:root {
+  --gold:        #f0b429;
+  --gold-glow:   rgba(240,180,41,0.20);
+  --gold-dim:    rgba(240,180,41,0.10);
+  --card-bg:     rgba(255,255,255,0.042);
+  --card-border: rgba(255,255,255,0.09);
+  --muted:       rgba(255,255,255,0.42);
+}
 
-  .card{
-    width:min(92vw,380px);
-    height:min(92vh,720px);
-    max-height:640px;
-    background:rgba(0,0,0,0.10);
-    border:1px solid rgba(255,255,255,.15);
-    border-radius:22px;
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
-    box-shadow:0 18px 60px rgba(0,0,0,.45);
-    padding:16px;
-    display:grid;
-    grid-template-rows:auto auto auto auto 1fr auto;
-    gap:10px;
-    text-align:center;
-    animation:fadeSlideIn .45s cubic-bezier(.22,.68,0,1.2) both;
-  }
+body {
+  min-height: 100svh;
+  background: #06060f;
+  display: flex; align-items: center; justify-content: center;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: #fff;
+  overflow: hidden;
+}
 
-  .avatar{width:110px;height:110px;margin:0 auto;border-radius:50%;overflow:hidden;
-          border:2px solid rgba(255,255,255,.45);box-shadow:0 10px 26px rgba(0,0,0,.45)}
-  .avatar img{width:100%;height:100%;object-fit:cover}
-  h1{font-size:22px;font-weight:700;margin-top:6px}
-  h2{font-size:12.5px;color:#d3d6da;letter-spacing:.6px}
+/* ─── Aurora blobs ─────────────────────────────── */
+.aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.blob {
+  position: absolute; border-radius: 50%;
+  filter: blur(90px); opacity: 0.32;
+  animation: drift linear infinite;
+}
+.blob-1 { width: 560px; height: 560px; background: #4a1080; top: -18%; left: -12%; animation-duration: 22s; }
+.blob-2 { width: 420px; height: 420px; background: #0a3f70; bottom: -14%; right: -8%; animation-duration: 28s; animation-delay: -10s; }
+.blob-3 { width: 320px; height: 320px; background: #0b7a6a; bottom: 18%; left: 28%; animation-duration: 19s; animation-delay: -5s; }
 
-  .icons{display:flex;justify-content:center;gap:12px}
-  .icons a{
-    width:36px;height:36px;border-radius:999px;display:grid;place-items:center;
-    background:rgba(0,0,0,.30);border:1px solid rgba(255,255,255,.15);
-    transition:transform .18s, box-shadow .25s;color:#fff;font-size:16px;
-    text-decoration:none;
-  }
-  .icons a:hover{transform:translateY(-2px);box-shadow:0 0 10px rgba(255,255,255,.15)}
-  /* Tint icons to distinguish the two Instagram accounts */
-  .icons a.ig-public{color:#e1306c}
-  .icons a.ig-personal{color:#f77737}
+@keyframes drift {
+  0%   { transform: translate(0px, 0px)   scale(1);    }
+  33%  { transform: translate(45px,-35px) scale(1.06); }
+  66%  { transform: translate(-25px,42px) scale(0.94); }
+  100% { transform: translate(0px, 0px)   scale(1);    }
+}
 
-  .featured .feat-label{font-size:12px;color:#cfd1d6;margin-bottom:6px}
-  .news{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-  .chip{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:12px;
-    background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.15);
-    font-size:12.5px;text-decoration:none;color:#fff;
-    transition:transform .15s, box-shadow .2s}
-  .chip i{font-size:14px}
-  .chip:hover{transform:translateY(-2px);box-shadow:0 0 10px rgba(255,255,255,.12)}
+/* ─── Particles canvas ─────────────────────────── */
+#particles { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
 
-  .links{display:flex;flex-direction:column;gap:8px;overflow:auto;scrollbar-width:none}
-  .links::-webkit-scrollbar{display:none}
-  .btn{display:flex;align-items:center;justify-content:space-between;
-    padding:12px 14px;border-radius:14px;
-    background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.14);
-    box-shadow:0 8px 18px rgba(0,0,0,.35);
-    transition:transform .18s, box-shadow .25s;text-decoration:none;color:#fff;
-    cursor:pointer;width:100%;font-family:inherit}
-  .btn:hover{transform:translateY(-2px);box-shadow:0 0 12px rgba(255,255,255,.12)}
-  .left{display:flex;align-items:center;gap:10px;text-align:left}
-  .left i{font-size:18px;width:20px;text-align:center}
-  .btn-label{font-size:14px;font-weight:650;line-height:1}
-  .sub{font-size:11px;color:#cbd0d6}
-  .chev{opacity:.7}
-  footer{font-size:11px;color:#cdd1d6}
+/* ─── Card ─────────────────────────────────────── */
+.card {
+  position: relative; z-index: 10;
+  width: min(92vw, 390px);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 28px;
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04) inset,
+    0 32px 80px rgba(0,0,0,0.65);
+  padding: 26px 20px 20px;
+  display: flex; flex-direction: column; gap: 18px;
+  text-align: center;
+  animation: cardIn 0.75s cubic-bezier(0.16,1,0.3,1) both;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.12s ease;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(36px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
 
-  /* ── Custom passcode modal ── */
-  .modal-overlay{
-    position:fixed;inset:0;background:rgba(0,0,0,.65);
-    display:none;align-items:center;justify-content:center;
-    z-index:200;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
-  }
-  .modal-overlay.open{display:flex}
-  .modal-box{
-    background:rgba(18,18,28,.92);
-    padding:24px 22px;border-radius:18px;text-align:center;
-    width:85%;max-width:310px;
-    border:1px solid rgba(255,255,255,.14);
-    box-shadow:0 0 32px rgba(0,0,0,.6);
-    animation:fadeSlideIn .3s cubic-bezier(.22,.68,0,1.2) both;
-  }
-  .modal-box h3{margin-bottom:8px;font-size:18px;font-weight:700}
-  .modal-box p{font-size:13px;color:#bbb;margin-bottom:14px}
-  .modal-box input[type=password]{
-    width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);
-    background:rgba(255,255,255,.08);color:#fff;font-size:14px;font-family:inherit;
-    outline:none;transition:border-color .2s;margin-bottom:12px;letter-spacing:2px;
-  }
-  .modal-box input[type=password]:focus{border-color:rgba(255,255,255,.45)}
-  .modal-box input[type=password]::placeholder{letter-spacing:0;color:#888}
-  .modal-actions{display:flex;gap:8px}
-  .modal-actions button{
-    flex:1;padding:9px 0;border-radius:10px;border:none;font-size:13px;
-    font-family:inherit;cursor:pointer;transition:opacity .2s;font-weight:600;
-  }
-  .btn-confirm{background:#0078ff;color:#fff}
-  .btn-cancel{background:rgba(255,255,255,.1);color:#ccc}
-  .modal-actions button:hover{opacity:.82}
-  .shake{animation:shake .35s ease both}
-  @keyframes shake{
-    20%{transform:translateX(-6px)}
-    40%{transform:translateX(6px)}
-    60%{transform:translateX(-4px)}
-    80%{transform:translateX(4px)}
-    100%{transform:translateX(0)}
-  }
+/* ─── Avatar ───────────────────────────────────── */
+.avatar-wrap {
+  position: relative; width: 96px; height: 96px;
+  margin: 0 auto;
+  animation: fadeUp 0.5s 0.15s both;
+}
+.avatar-ring {
+  position: absolute; inset: -4px; border-radius: 50%;
+  background: conic-gradient(from 0deg, var(--gold), #f97316, #ec4899, #7c3aed, #2563eb, var(--gold));
+  animation: spin 4s linear infinite;
+}
+.avatar-mask {
+  position: absolute; inset: 3px; border-radius: 50%;
+  background: #06060f; overflow: hidden;
+}
+.avatar-mask img {
+  width: 100%; height: 100%; object-fit: cover;
+  border-radius: 50%;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Location popup ── */
-  .popup{
-    position:fixed;inset:0;background:rgba(0,0,0,.7);
-    display:none;align-items:center;justify-content:center;z-index:100;
-  }
-  .popup.open{display:flex}
-  .popup-content{
-    background:rgba(15,15,15,0.9);
-    padding:20px 25px;border-radius:16px;text-align:center;
-    width:85%;max-width:320px;
-    box-shadow:0 0 20px rgba(255,255,255,.15);
-    animation:fadeSlideIn .3s cubic-bezier(.22,.68,0,1.2) both;
-  }
-  .popup-content h3{margin-bottom:10px;font-size:18px;font-weight:600}
-  .popup-content p{font-size:13px;color:#ccc;margin-bottom:14px}
-  .popup-content a{
-    display:inline-block;background:#0078ff;color:#fff;
-    padding:8px 16px;border-radius:8px;text-decoration:none;font-size:13px;
-    transition:opacity .2s}
-  .popup-content a:hover{opacity:.8}
-  .popup-content button{
-    margin-top:12px;background:none;border:none;color:#aaa;
-    font-size:12px;cursor:pointer;font-family:inherit;
-  }
+/* ─── Identity ─────────────────────────────────── */
+.identity { display: flex; flex-direction: column; align-items: center; gap: 8px; animation: fadeUp 0.5s 0.25s both; }
 
-  @media (max-height:780px){.card{width:350px;padding:14px}}
-  @media (max-height:700px){.card{width:330px;padding:12px;max-height:620px}}
+.name {
+  font-size: 27px; font-weight: 800; letter-spacing: -0.6px;
+  background: linear-gradient(160deg, #fff 50%, rgba(255,255,255,0.55));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.badge {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--gold-dim);
+  border: 1px solid rgba(240,180,41,0.28);
+  border-radius: 999px; padding: 5px 13px;
+}
+.badge-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--gold);
+  animation: glow 2.2s ease-in-out infinite;
+}
+@keyframes glow {
+  0%,100% { box-shadow: 0 0 0 0 var(--gold-glow); opacity: 1; }
+  50%      { box-shadow: 0 0 0 5px transparent;     opacity: 0.6; }
+}
+.badge-text {
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.9px;
+  text-transform: uppercase; color: var(--gold);
+}
+
+.location-time {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11.5px; color: var(--muted);
+}
+.location-time i { font-size: 10px; }
+
+/* ─── Press ────────────────────────────────────── */
+.press { animation: fadeUp 0.5s 0.38s both; }
+.press-label { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.press-chips { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; border-radius: 10px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  font-size: 12px; color: rgba(255,255,255,0.78); text-decoration: none;
+  transition: all 0.2s;
+}
+.chip i { font-size: 12px; color: var(--gold); }
+.chip:hover { background: rgba(255,255,255,0.11); transform: translateY(-2px); color: #fff; }
+
+/* ─── Icon row ─────────────────────────────────── */
+.icons { display: flex; justify-content: center; gap: 10px; animation: fadeUp 0.5s 0.48s both; }
+.icon-btn {
+  width: 44px; height: 44px; border-radius: 14px;
+  display: grid; place-items: center; font-size: 17px;
+  text-decoration: none; color: rgba(255,255,255,0.72);
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+  position: relative; overflow: hidden;
+  transition: transform 0.22s, color 0.22s, box-shadow 0.22s;
+}
+.icon-btn i { position: relative; z-index: 1; }
+.icon-btn::before {
+  content: ''; position: absolute; inset: 0; opacity: 0;
+  transition: opacity 0.22s;
+  border-radius: inherit;
+}
+.icon-btn:hover { transform: translateY(-3px) scale(1.1); color: #fff; }
+.icon-btn:hover::before { opacity: 1; }
+
+.icon-btn.phone::before        { background: linear-gradient(135deg,#25d366,#128c7e); }
+.icon-btn.phone:hover          { box-shadow: 0 6px 20px rgba(37,211,102,0.35); }
+.icon-btn.ig-pub::before       { background: linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); }
+.icon-btn.ig-pub:hover         { box-shadow: 0 6px 20px rgba(220,39,67,0.35); }
+.icon-btn.ig-pers::before      { background: linear-gradient(135deg,#f77737,#fcaf45,#ffdc80); }
+.icon-btn.ig-pers:hover        { box-shadow: 0 6px 20px rgba(247,119,55,0.35); }
+.icon-btn.wa::before           { background: linear-gradient(135deg,#25d366,#128c7e); }
+.icon-btn.wa:hover             { box-shadow: 0 6px 20px rgba(37,211,102,0.35); }
+.icon-btn.li::before           { background: #0077b5; }
+.icon-btn.li:hover             { box-shadow: 0 6px 20px rgba(0,119,181,0.4); }
+
+/* ─── Link buttons ─────────────────────────────── */
+.links { display: flex; flex-direction: column; gap: 8px; }
+
+.btn {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; border-radius: 16px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  text-decoration: none; color: #fff;
+  cursor: pointer; font-family: inherit; width: 100%;
+  position: relative; overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  animation: fadeUp 0.45s both;
+}
+.btn:nth-child(1) { animation-delay: 0.55s; }
+.btn:nth-child(2) { animation-delay: 0.63s; }
+.btn:nth-child(3) { animation-delay: 0.71s; }
+.btn:nth-child(4) { animation-delay: 0.79s; }
+.btn:nth-child(5) { animation-delay: 0.87s; }
+
+/* shimmer sweep */
+.btn::after {
+  content: ''; position: absolute;
+  top: 0; left: -100%; width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.055), transparent);
+  transition: none; pointer-events: none;
+}
+.btn:hover::after { animation: shimmer 0.55s ease forwards; }
+@keyframes shimmer { to { left: 150%; } }
+
+.btn:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.17); }
+
+/* brand glow per button */
+.btn-wa:hover   { box-shadow: 0 8px 28px rgba(37,211,102,0.18); }
+.btn-ig:hover   { box-shadow: 0 8px 28px rgba(220,39,67,0.18); }
+.btn-li:hover   { box-shadow: 0 8px 28px rgba(0,119,181,0.20); }
+.btn-loc:hover  { box-shadow: 0 8px 28px rgba(240,180,41,0.20); }
+
+/* icon box inside button */
+.btn-icon {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  display: grid; place-items: center; font-size: 15px;
+}
+.btn-wa  .btn-icon { background: rgba(37,211,102,0.14); color: #25d366; }
+.btn-ig  .btn-icon { background: rgba(220,39,67,0.14);  color: #e1306c; }
+.btn-li  .btn-icon { background: rgba(0,119,181,0.16);  color: #4da8d8; }
+.btn-loc .btn-icon { background: var(--gold-dim);        color: var(--gold); }
+
+.btn-text { text-align: left; flex: 1; margin-left: 12px; }
+.btn-label { font-size: 13.5px; font-weight: 700; line-height: 1.2; }
+.btn-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.chev { opacity: 0.3; font-size: 16px; margin-left: 4px; }
+
+/* ─── Footer ───────────────────────────────────── */
+footer {
+  font-size: 10.5px; color: rgba(255,255,255,0.25);
+  animation: fadeUp 0.5s 1s both;
+}
+
+/* ─── Utility ──────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Passcode modal ───────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  z-index: 200;
+}
+.modal-overlay.open { display: flex; }
+
+.modal-box {
+  background: rgba(14,14,22,0.95);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 26px 22px; border-radius: 22px;
+  width: 85%; max-width: 300px; text-align: center;
+  box-shadow: 0 0 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05) inset;
+  animation: fadeUp 0.3s cubic-bezier(0.16,1,0.3,1) both;
+}
+.modal-box h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.modal-box p  { font-size: 12.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+
+.modal-box input[type=password] {
+  width: 100%; padding: 11px 14px; border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.07); color: #fff;
+  font-size: 15px; font-family: inherit; letter-spacing: 3px;
+  outline: none; transition: border-color 0.2s; margin-bottom: 10px;
+  text-align: center;
+}
+.modal-box input[type=password]:focus { border-color: rgba(240,180,41,0.5); }
+.modal-box input[type=password]::placeholder { letter-spacing: 0; color: rgba(255,255,255,0.25); font-size: 13px; }
+
+.modal-err { font-size: 12px; color: #ff6b6b; min-height: 16px; margin-bottom: 10px; }
+
+.modal-actions { display: flex; gap: 8px; }
+.modal-actions button {
+  flex: 1; padding: 10px; border-radius: 11px; border: none;
+  font-size: 13px; font-weight: 700; font-family: inherit;
+  cursor: pointer; transition: opacity 0.2s, transform 0.15s;
+}
+.modal-actions button:hover { opacity: 0.85; transform: scale(0.98); }
+.btn-confirm { background: var(--gold); color: #060608; }
+.btn-cancel  { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+
+.shake { animation: shake 0.35s ease both; }
+@keyframes shake {
+  20%  { transform: translateX(-7px); }
+  40%  { transform: translateX(7px);  }
+  60%  { transform: translateX(-4px); }
+  80%  { transform: translateX(4px);  }
+  100% { transform: translateX(0);    }
+}
+
+/* ─── Location popup ───────────────────────────── */
+.popup { position: fixed; inset: 0; background: rgba(0,0,0,0.72); display: none; align-items: center; justify-content: center; z-index: 100; }
+.popup.open { display: flex; }
+.popup-content {
+  background: rgba(12,12,20,0.96); border: 1px solid rgba(255,255,255,0.1);
+  padding: 24px; border-radius: 20px; text-align: center;
+  width: 85%; max-width: 310px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  animation: fadeUp 0.3s cubic-bezier(0.16,1,0.3,1) both;
+}
+.popup-content h3    { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.popup-content p     { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+.popup-content a     { display: inline-block; background: var(--gold); color: #060608; padding: 9px 18px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 700; transition: opacity 0.2s; }
+.popup-content a:hover { opacity: 0.85; }
+.popup-content button { margin-top: 12px; background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; font-family: inherit; }
+
+/* ─── Responsive ───────────────────────────────── */
+@media (max-height: 700px) {
+  .card { padding: 18px 16px; gap: 13px; }
+  .avatar-wrap { width: 78px; height: 78px; }
+  .name { font-size: 22px; }
+  .press { display: none; }
+}
+@media (max-height: 600px) {
+  .icons { display: none; }
+}
 </style>
 </head>
 
 <body>
-<section class="card">
-  <div class="avatar">
-    <img src="assets/bharat.jpg" alt="Bharat Jagwani" loading="eager" decoding="async">
-  </div>
-  <div>
-    <h1>Bharat Jagwani</h1>
-    <h2>VICE PRESIDENT – PROGRAM &amp; LEADERSHIP</h2>
+
+<!-- Aurora -->
+<div class="aurora">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<!-- Particles -->
+<canvas id="particles"></canvas>
+
+<!-- Card -->
+<section class="card" id="card">
+
+  <!-- Avatar -->
+  <div class="avatar-wrap">
+    <div class="avatar-ring"></div>
+    <div class="avatar-mask">
+      <img src="assets/bharat.jpg" alt="Bharat Jagwani" loading="eager" decoding="async" />
+    </div>
   </div>
 
-  <div class="icons">
-    <a href="tel:+919920906277" aria-label="Call Bharat">
-      <i class="fa-solid fa-phone"></i>
-    </a>
-    <a href="https://instagram.com/brat_board" target="_blank" rel="noopener noreferrer"
-       aria-label="Instagram – brat_board (Public Page)" class="ig-public">
-      <i class="fa-brands fa-instagram"></i>
-    </a>
-    <a href="https://instagram.com/brat_ology" target="_blank" rel="noopener noreferrer"
-       aria-label="Instagram – brat_ology (Personal)" class="ig-personal">
-      <i class="fa-brands fa-instagram"></i>
-    </a>
-    <a href="https://wa.me/919920906277?text=Hi%20Bharat" target="_blank" rel="noopener noreferrer"
-       aria-label="WhatsApp">
-      <i class="fa-brands fa-whatsapp"></i>
-    </a>
-    <a href="https://www.linkedin.com/in/bharat-jagwani" target="_blank" rel="noopener noreferrer"
-       aria-label="LinkedIn">
-      <i class="fa-brands fa-linkedin"></i>
-    </a>
+  <!-- Identity -->
+  <div class="identity">
+    <h1 class="name">Bharat Jagwani</h1>
+    <div class="badge">
+      <span class="badge-dot"></span>
+      <span class="badge-text">VP · Program &amp; Leadership</span>
+    </div>
+    <div class="location-time">
+      <i class="fa-solid fa-location-dot"></i>
+      <span id="mumbai-time">Mumbai, India</span>
+    </div>
   </div>
 
-  <div class="featured">
-    <div class="feat-label">Featured In News</div>
-    <div class="news">
-      <a class="chip" href="https://timesofindia.indiatimes.com/life-style/spotlight/this-mumbaikars-making-a-point-with-his-witty-signs/articleshow/88296415.cms"
+  <!-- Press -->
+  <div class="press">
+    <div class="press-label">As seen in</div>
+    <div class="press-chips">
+      <a class="chip"
+         href="https://timesofindia.indiatimes.com/life-style/spotlight/this-mumbaikars-making-a-point-with-his-witty-signs/articleshow/88296415.cms"
          target="_blank" rel="noopener noreferrer">
         <i class="fa-solid fa-newspaper"></i> Times of India
       </a>
-      <a class="chip" href="https://www.whatshot.in/mumbai/mumbai-dude-with-sign-raising-words-one-board-at-a-time-c-30116"
+      <a class="chip"
+         href="https://www.whatshot.in/mumbai/mumbai-dude-with-sign-raising-words-one-board-at-a-time-c-30116"
          target="_blank" rel="noopener noreferrer">
         <i class="fa-solid fa-fire-flame-curved"></i> Whatshot Mumbai
       </a>
     </div>
   </div>
 
+  <!-- Icon row -->
+  <div class="icons">
+    <a class="icon-btn phone" href="tel:+919920906277" aria-label="Call Bharat">
+      <i class="fa-solid fa-phone"></i>
+    </a>
+    <a class="icon-btn ig-pub" href="https://instagram.com/brat_board" target="_blank" rel="noopener noreferrer" aria-label="Instagram brat_board – Public Page">
+      <i class="fa-brands fa-instagram"></i>
+    </a>
+    <a class="icon-btn ig-pers" href="https://instagram.com/brat_ology" target="_blank" rel="noopener noreferrer" aria-label="Instagram brat_ology – Personal">
+      <i class="fa-brands fa-instagram"></i>
+    </a>
+    <a class="icon-btn wa" href="https://wa.me/919920906277?text=Hi%20Bharat" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+      <i class="fa-brands fa-whatsapp"></i>
+    </a>
+    <a class="icon-btn li" href="https://www.linkedin.com/in/bharat-jagwani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+      <i class="fa-brands fa-linkedin"></i>
+    </a>
+  </div>
+
+  <!-- Link buttons -->
   <nav class="links">
-    <a class="btn" href="https://wa.me/919920906277?text=Hi%20Bharat" target="_blank" rel="noopener noreferrer">
-      <span class="left"><i class="fa-brands fa-whatsapp"></i><span><div class="btn-label">WhatsApp</div><div class="sub">Message me instantly</div></span></span>
-      <span class="chev">›</span>
+    <a class="btn btn-wa" href="https://wa.me/919920906277?text=Hi%20Bharat" target="_blank" rel="noopener noreferrer">
+      <span class="btn-icon"><i class="fa-brands fa-whatsapp"></i></span>
+      <span class="btn-text">
+        <div class="btn-label">WhatsApp</div>
+        <div class="btn-sub">Message me instantly</div>
+      </span>
+      <span class="chev"><i class="fa-solid fa-chevron-right"></i></span>
     </a>
 
-    <a class="btn" href="https://instagram.com/brat_board" target="_blank" rel="noopener noreferrer">
-      <span class="left"><i class="fa-brands fa-instagram"></i><span><div class="btn-label">Instagram — brat_board</div><div class="sub">Public Page</div></span></span>
-      <span class="chev">›</span>
+    <a class="btn btn-ig" href="https://instagram.com/brat_board" target="_blank" rel="noopener noreferrer">
+      <span class="btn-icon"><i class="fa-brands fa-instagram"></i></span>
+      <span class="btn-text">
+        <div class="btn-label">@brat_board</div>
+        <div class="btn-sub">Public Instagram Page</div>
+      </span>
+      <span class="chev"><i class="fa-solid fa-chevron-right"></i></span>
     </a>
 
-    <a class="btn" href="https://instagram.com/brat_ology" target="_blank" rel="noopener noreferrer">
-      <span class="left"><i class="fa-brands fa-instagram"></i><span><div class="btn-label">Instagram — brat_ology</div><div class="sub">Personal</div></span></span>
-      <span class="chev">›</span>
+    <a class="btn btn-ig" href="https://instagram.com/brat_ology" target="_blank" rel="noopener noreferrer">
+      <span class="btn-icon"><i class="fa-brands fa-instagram"></i></span>
+      <span class="btn-text">
+        <div class="btn-label">@brat_ology</div>
+        <div class="btn-sub">Personal Instagram</div>
+      </span>
+      <span class="chev"><i class="fa-solid fa-chevron-right"></i></span>
     </a>
 
-    <a class="btn" href="https://www.linkedin.com/in/bharat-jagwani" target="_blank" rel="noopener noreferrer">
-      <span class="left"><i class="fa-brands fa-linkedin"></i><span><div class="btn-label">LinkedIn</div><div class="sub">View Profile</div></span></span>
-      <span class="chev">›</span>
+    <a class="btn btn-li" href="https://www.linkedin.com/in/bharat-jagwani" target="_blank" rel="noopener noreferrer">
+      <span class="btn-icon"><i class="fa-brands fa-linkedin"></i></span>
+      <span class="btn-text">
+        <div class="btn-label">LinkedIn</div>
+        <div class="btn-sub">View professional profile</div>
+      </span>
+      <span class="chev"><i class="fa-solid fa-chevron-right"></i></span>
     </a>
 
-    <button class="btn" onclick="openPasscodeModal()">
-      <span class="left"><i class="fa-solid fa-lock"></i><span><div class="btn-label">My Location</div><div class="sub">Passcode required</div></span></span>
-      <span class="chev">›</span>
+    <button class="btn btn-loc" onclick="openPasscodeModal()">
+      <span class="btn-icon"><i class="fa-solid fa-location-dot"></i></span>
+      <span class="btn-text">
+        <div class="btn-label">My Location</div>
+        <div class="btn-sub">Passcode protected</div>
+      </span>
+      <span class="chev"><i class="fa-solid fa-chevron-right"></i></span>
     </button>
   </nav>
 
-  <footer>© <span id="yr"></span> Bharat Jagwani</footer>
+  <footer>© <span id="yr"></span> Bharat Jagwani · Mumbai</footer>
+
 </section>
 
 <!-- Passcode modal -->
 <div class="modal-overlay" id="passcodeModal" onclick="handleOverlayClick(event)">
   <div class="modal-box" id="passcodeBox">
-    <h3><i class="fa-solid fa-lock" style="font-size:15px;margin-right:6px"></i>Enter Passcode</h3>
-    <p>This location is private. Please enter the passcode to continue.</p>
-    <input type="password" id="passcodeInput" placeholder="Passcode" maxlength="20"
+    <h3><i class="fa-solid fa-shield-halved" style="color:var(--gold);margin-right:7px;font-size:15px"></i>Private Location</h3>
+    <p>Enter the passcode to unlock Bharat's location.</p>
+    <input type="password" id="passcodeInput" placeholder="Enter passcode" maxlength="20"
            onkeydown="if(event.key==='Enter')confirmPasscode()" />
-    <div id="passcodeError" style="font-size:12px;color:#ff6b6b;margin-bottom:10px;min-height:16px"></div>
+    <div class="modal-err" id="passcodeError"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closePasscodeModal()">Cancel</button>
       <button class="btn-confirm" onclick="confirmPasscode()">Unlock</button>
@@ -253,51 +470,128 @@
 <!-- Location popup -->
 <div class="popup" id="popup">
   <div class="popup-content">
-    <h3>Bharat's Location</h3>
-    <p>A104-Jeevan Jyoti Society Santacruz West, MSEB Road,<br>next to Milan International Hotel, Mumbai</p>
-    <a href="https://maps.app.goo.gl/JQ85wrLcpXm7M4wu9" target="_blank" rel="noopener noreferrer">📍 Take me to Google Maps</a>
+    <h3>📍 Bharat's Location</h3>
+    <p>A104 – Jeevan Jyoti Society<br>Santacruz West, MSEB Road<br>next to Milan International Hotel<br>Mumbai, India</p>
+    <a href="https://maps.app.goo.gl/JQ85wrLcpXm7M4wu9" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
     <br>
     <button onclick="closePopup()">Close</button>
   </div>
 </div>
 
 <script>
-  document.getElementById('yr').textContent = new Date().getFullYear();
+/* ── Year ── */
+document.getElementById('yr').textContent = new Date().getFullYear();
 
-  function openPasscodeModal() {
-    document.getElementById('passcodeInput').value = '';
-    document.getElementById('passcodeError').textContent = '';
-    document.getElementById('passcodeModal').classList.add('open');
-    setTimeout(() => document.getElementById('passcodeInput').focus(), 80);
+/* ── Live Mumbai time ── */
+function updateTime() {
+  const t = new Date().toLocaleTimeString('en-IN', {
+    timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true
+  });
+  document.getElementById('mumbai-time').textContent = `Mumbai · ${t} IST`;
+}
+updateTime();
+setInterval(updateTime, 10000);
+
+/* ── Particle system ── */
+(function () {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let W = canvas.width = window.innerWidth;
+  let H = canvas.height = window.innerHeight;
+
+  const COUNT = 55;
+  const dots = Array.from({ length: COUNT }, () => ({
+    x: Math.random() * W,
+    y: Math.random() * H,
+    r: Math.random() * 1.3 + 0.4,
+    dx: (Math.random() - 0.5) * 0.25,
+    dy: (Math.random() - 0.5) * 0.25,
+    a: Math.random() * 0.35 + 0.08,
+  }));
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    dots.forEach(d => {
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${d.a})`;
+      ctx.fill();
+      d.x += d.dx; d.y += d.dy;
+      if (d.x < 0) d.x = W; if (d.x > W) d.x = 0;
+      if (d.y < 0) d.y = H; if (d.y > H) d.y = 0;
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  window.addEventListener('resize', () => {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  });
+})();
+
+/* ── 3D card tilt on mouse ── */
+(function () {
+  const card = document.getElementById('card');
+  let resetTimer;
+
+  card.addEventListener('mousemove', e => {
+    clearTimeout(resetTimer);
+    const r   = card.getBoundingClientRect();
+    const cx  = r.left + r.width  / 2;
+    const cy  = r.top  + r.height / 2;
+    const rx  = ((e.clientY - cy) / (r.height / 2)) * -6;
+    const ry  = ((e.clientX - cx) / (r.width  / 2)) *  6;
+    card.style.transition = 'transform 0.1s ease';
+    card.style.transform  = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.012)`;
+  });
+
+  function resetTilt() {
+    card.style.transition = 'transform 0.6s cubic-bezier(0.23,1,0.32,1)';
+    card.style.transform  = '';
   }
 
-  function closePasscodeModal() {
-    document.getElementById('passcodeModal').classList.remove('open');
-  }
+  card.addEventListener('mouseleave', resetTilt);
+  // Touch: no tilt on mobile
+  card.addEventListener('touchstart', resetTilt, { passive: true });
+})();
 
-  function handleOverlayClick(e) {
-    if (e.target === document.getElementById('passcodeModal')) closePasscodeModal();
-  }
+/* ── Passcode modal ── */
+function openPasscodeModal() {
+  document.getElementById('passcodeInput').value = '';
+  document.getElementById('passcodeError').textContent = '';
+  document.getElementById('passcodeModal').classList.add('open');
+  setTimeout(() => document.getElementById('passcodeInput').focus(), 100);
+}
 
-  function confirmPasscode() {
-    const input = document.getElementById('passcodeInput');
-    if (input.value === 'bkjbkj') {
-      closePasscodeModal();
-      document.getElementById('popup').classList.add('open');
-    } else {
-      document.getElementById('passcodeError').textContent = 'Incorrect passcode. Try again.';
-      const box = document.getElementById('passcodeBox');
-      box.classList.remove('shake');
-      void box.offsetWidth; // reflow to restart animation
-      box.classList.add('shake');
-      input.value = '';
-      input.focus();
-    }
-  }
+function closePasscodeModal() {
+  document.getElementById('passcodeModal').classList.remove('open');
+}
 
-  function closePopup() {
-    document.getElementById('popup').classList.remove('open');
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('passcodeModal')) closePasscodeModal();
+}
+
+function confirmPasscode() {
+  const input = document.getElementById('passcodeInput');
+  if (input.value === 'bkjbkj') {
+    closePasscodeModal();
+    document.getElementById('popup').classList.add('open');
+  } else {
+    document.getElementById('passcodeError').textContent = 'Incorrect passcode.';
+    const box = document.getElementById('passcodeBox');
+    box.classList.remove('shake');
+    void box.offsetWidth;
+    box.classList.add('shake');
+    input.value = '';
+    input.focus();
   }
+}
+
+function closePopup() {
+  document.getElementById('popup').classList.remove('open');
+}
 </script>
+
 </body>
 </html>
