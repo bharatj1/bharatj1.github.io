@@ -18,19 +18,19 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --gold:        #f0b429;
-  --gold-glow:   rgba(240,180,41,0.20);
-  --gold-dim:    rgba(240,180,41,0.10);
-  --teal:        #0d9488;
-  --teal-glow:   rgba(13,148,136,0.18);
-  --card-bg:     rgba(255,255,255,0.042);
-  --card-border: rgba(255,255,255,0.09);
-  --muted:       rgba(255,255,255,0.42);
+  --gold:        #c9a84c;
+  --gold-bright: #e8c96a;
+  --gold-glow:   rgba(201,168,76,0.22);
+  --gold-dim:    rgba(201,168,76,0.10);
+  --gold-border: rgba(201,168,76,0.18);
+  --card-bg:     rgba(255,255,255,0.028);
+  --card-border: rgba(201,168,76,0.14);
+  --muted:       rgba(255,255,255,0.38);
 }
 
 body {
   min-height: 100svh;
-  background: #06060f;
+  background: #030307;
   display: flex; align-items: center; justify-content: center;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   color: #fff;
@@ -41,12 +41,12 @@ body {
 .aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 .blob {
   position: absolute; border-radius: 50%;
-  filter: blur(90px); opacity: 0.32;
+  filter: blur(110px); opacity: 0.22;
   animation: drift linear infinite;
 }
-.blob-1 { width: 560px; height: 560px; background: #062e28; top: -18%; left: -12%; animation-duration: 22s; }
-.blob-2 { width: 420px; height: 420px; background: #06122a; bottom: -14%; right: -8%; animation-duration: 28s; animation-delay: -10s; }
-.blob-3 { width: 340px; height: 340px; background: #2d1000; bottom: 18%; left: 28%; animation-duration: 19s; animation-delay: -5s; }
+.blob-1 { width: 600px; height: 600px; background: #1e1400; top: -20%; left: -14%; animation-duration: 26s; }
+.blob-2 { width: 460px; height: 460px; background: #0a0808; bottom: -16%; right: -10%; animation-duration: 32s; animation-delay: -12s; }
+.blob-3 { width: 380px; height: 380px; background: #180f00; bottom: 20%; left: 30%; animation-duration: 21s; animation-delay: -6s; }
 
 @keyframes drift {
   0%   { transform: translate(0px, 0px)   scale(1);    }
@@ -68,19 +68,19 @@ body {
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   box-shadow:
-    0 0 0 1px rgba(255,255,255,0.04) inset,
-    0 32px 80px rgba(0,0,0,0.65);
+    0 0 0 1px rgba(201,168,76,0.07) inset,
+    0 40px 100px rgba(0,0,0,0.85);
   padding: 26px 20px 20px;
   display: flex; flex-direction: column; gap: 18px;
   text-align: center;
-  animation: cardIn 0.75s cubic-bezier(0.16,1,0.3,1) both, cardBreathe 7s 1.2s ease-in-out infinite;
+  animation: cardIn 0.75s cubic-bezier(0.16,1,0.3,1) both, cardBreathe 8s 1.5s ease-in-out infinite;
   transform-style: preserve-3d;
   will-change: transform;
   transition: transform 0.12s ease;
 }
 @keyframes cardBreathe {
-  0%,100% { box-shadow: 0 0 0 1px rgba(255,255,255,0.04) inset, 0 32px 80px rgba(0,0,0,0.65), 0 0 0px var(--teal-glow); }
-  50%     { box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 32px 80px rgba(0,0,0,0.65), 0 0 55px var(--teal-glow); }
+  0%,100% { box-shadow: 0 0 0 1px rgba(201,168,76,0.07) inset, 0 40px 100px rgba(0,0,0,0.85), 0 0 0px var(--gold-glow); }
+  50%     { box-shadow: 0 0 0 1px rgba(201,168,76,0.13) inset, 0 40px 100px rgba(0,0,0,0.85), 0 0 60px var(--gold-glow); }
 }
 @keyframes cardIn {
   from { opacity: 0; transform: translateY(36px) scale(0.95); }
@@ -95,12 +95,12 @@ body {
 }
 .avatar-ring {
   position: absolute; inset: -4px; border-radius: 50%;
-  background: conic-gradient(from 0deg, var(--gold), #c8860a, var(--teal), #14b8a6, var(--gold));
-  animation: spin 5s linear infinite;
+  background: conic-gradient(from 0deg, #6b4e10, #c9a84c, #f0d080, #e8c96a, #c9a84c, #6b4e10);
+  animation: spin 6s linear infinite;
 }
 .avatar-mask {
   position: absolute; inset: 3px; border-radius: 50%;
-  background: #06060f; overflow: hidden;
+  background: #030307; overflow: hidden;
 }
 /* Slideshow */
 .avatar-mask .slide {
@@ -117,26 +117,26 @@ body {
 .identity { display: flex; flex-direction: column; align-items: center; gap: 8px; animation: fadeUp 0.5s 0.25s both; }
 
 .name {
-  font-size: 27px; font-weight: 800; letter-spacing: -0.6px;
-  background: linear-gradient(160deg, #fff 50%, rgba(255,255,255,0.55));
+  font-size: 28px; font-weight: 800; letter-spacing: -0.5px;
+  background: linear-gradient(160deg, #fff 30%, var(--gold-bright) 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .badge {
   display: inline-flex; align-items: center; gap: 7px;
-  background: var(--gold-dim);
-  border: 1px solid rgba(240,180,41,0.28);
-  border-radius: 999px; padding: 5px 13px;
+  background: rgba(201,168,76,0.08);
+  border: 1px solid var(--gold-border);
+  border-radius: 999px; padding: 5px 14px;
 }
 .badge-dot {
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--gold);
-  animation: glow 2.2s ease-in-out infinite;
+  animation: glow 2.5s ease-in-out infinite;
 }
 @keyframes glow {
   0%,100% { box-shadow: 0 0 0 0 var(--gold-glow); opacity: 1; }
-  50%      { box-shadow: 0 0 0 5px transparent;     opacity: 0.6; }
+  50%      { box-shadow: 0 0 0 6px transparent;     opacity: 0.55; }
 }
 .badge-text {
   font-size: 10.5px; font-weight: 700; letter-spacing: 0.9px;
@@ -523,13 +523,16 @@ setInterval(updateTime, 10000);
   let H = canvas.height = window.innerHeight;
 
   const COUNT = 70;
+  // Mix of white and gold particles
+  const GOLDS = ['201,168,76', '232,201,106', '255,255,255'];
   const dots = Array.from({ length: COUNT }, () => ({
     x: Math.random() * W,
     y: Math.random() * H,
-    r: Math.random() * 1.5 + 0.4,
-    dx: (Math.random() - 0.5) * 0.45,
-    dy: (Math.random() - 0.5) * 0.45,
-    a: Math.random() * 0.4 + 0.08,
+    r: Math.random() * 1.4 + 0.3,
+    dx: (Math.random() - 0.5) * 0.38,
+    dy: (Math.random() - 0.5) * 0.38,
+    a: Math.random() * 0.35 + 0.06,
+    c: GOLDS[Math.floor(Math.random() * GOLDS.length)],
   }));
 
   function draw() {
@@ -537,7 +540,7 @@ setInterval(updateTime, 10000);
     dots.forEach(d => {
       ctx.beginPath();
       ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(255,255,255,${d.a})`;
+      ctx.fillStyle = `rgba(${d.c},${d.a})`;
       ctx.fill();
       d.x += d.dx; d.y += d.dy;
       if (d.x < 0) d.x = W; if (d.x > W) d.x = 0;
