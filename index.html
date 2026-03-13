@@ -103,8 +103,36 @@ body {
   100% { transform: translate(0px,    0px)   scale(1);    }
 }
 
-/* ─── Particles canvas ─────────────────────────── */
+/* ─── Floating crowns ──────────────────────────── */
 #particles { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+.float-crown {
+  position: fixed; z-index: 2; pointer-events: none;
+  font-size: 22px; user-select: none;
+  animation: crownFloat linear infinite;
+  opacity: 0;
+  filter: drop-shadow(0 0 6px rgba(201,168,76,0.7));
+}
+@keyframes crownFloat {
+  0%   { transform: translateY(0)   rotate(-8deg)  scale(0.85); opacity: 0; }
+  8%   { opacity: 0.55; }
+  50%  { transform: translateY(-46vh) rotate(12deg) scale(1.05); opacity: 0.4; }
+  92%  { opacity: 0.15; }
+  100% { transform: translateY(-95vh) rotate(-5deg) scale(0.8);  opacity: 0; }
+}
+
+/* ─── Crown burst on click ─────────────────────── */
+.crown-burst {
+  position: fixed; z-index: 999; pointer-events: none;
+  font-size: 20px; user-select: none;
+  animation: crownBurst 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+  filter: drop-shadow(0 0 8px rgba(240,208,80,0.9));
+}
+@keyframes crownBurst {
+  0%   { transform: translate(0,0) scale(0.3) rotate(0deg); opacity: 1; }
+  60%  { opacity: 1; }
+  100% { transform: translate(var(--bx), var(--by)) scale(1.2) rotate(var(--br)); opacity: 0; }
+}
 
 /* ─── Card ─────────────────────────────────────── */
 .card {
@@ -561,46 +589,42 @@ function updateTime() {
 updateTime();
 setInterval(updateTime, 10000);
 
-/* ── Particle system ── */
+/* ── Floating crown system ── */
 (function () {
-  const canvas = document.getElementById('particles');
-  const ctx = canvas.getContext('2d');
-  let W = canvas.width = window.innerWidth;
-  let H = canvas.height = window.innerHeight;
+  const COUNT = 18;
+  const SIZES = ['16px','18px','20px','24px','14px','22px'];
 
-  const COUNT = 70;
-  // Mix of white and gold particles
-  const GOLDS = ['201,168,76', '232,201,106', '255,255,255'];
-  const dots = Array.from({ length: COUNT }, () => ({
-    x: Math.random() * W,
-    y: Math.random() * H,
-    r: Math.random() * 1.4 + 0.3,
-    dx: (Math.random() - 0.5) * 0.38,
-    dy: (Math.random() - 0.5) * 0.38,
-    a: Math.random() * 0.35 + 0.06,
-    c: GOLDS[Math.floor(Math.random() * GOLDS.length)],
-  }));
-
-  function draw() {
-    ctx.clearRect(0, 0, W, H);
-    dots.forEach(d => {
-      ctx.beginPath();
-      ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${d.c},${d.a})`;
-      ctx.fill();
-      d.x += d.dx; d.y += d.dy;
-      if (d.x < 0) d.x = W; if (d.x > W) d.x = 0;
-      if (d.y < 0) d.y = H; if (d.y > H) d.y = 0;
-    });
-    requestAnimationFrame(draw);
+  function spawnCrown() {
+    const el = document.createElement('div');
+    el.className = 'float-crown';
+    el.textContent = '👑';
+    const x = Math.random() * 96 + 2; // 2–98vw
+    const dur = Math.random() * 14 + 12; // 12–26s
+    const delay = Math.random() * -26;
+    el.style.cssText = `left:${x}vw; bottom:-40px; font-size:${SIZES[Math.floor(Math.random()*SIZES.length)]}; animation-duration:${dur}s; animation-delay:${delay}s;`;
+    document.body.appendChild(el);
   }
-  draw();
 
-  window.addEventListener('resize', () => {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
-  });
+  for (let i = 0; i < COUNT; i++) spawnCrown();
 })();
+
+/* ── Crown burst on click ── */
+function spawnCrownBurst(x, y) {
+  const COUNT = 8;
+  for (let i = 0; i < COUNT; i++) {
+    const el = document.createElement('div');
+    el.className = 'crown-burst';
+    el.textContent = '👑';
+    const angle = (i / COUNT) * Math.PI * 2;
+    const dist  = Math.random() * 70 + 50;
+    const bx    = Math.cos(angle) * dist;
+    const by    = Math.sin(angle) * dist - 30;
+    const br    = (Math.random() - 0.5) * 60 + 'deg';
+    el.style.cssText = `left:${x}px; top:${y}px; --bx:${bx}px; --by:${by}px; --br:${br}; animation-delay:${i*0.04}s; font-size:${Math.random()*10+14}px;`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+  }
+}
 
 /* ── 3D card tilt on mouse ── */
 (function () {
@@ -628,9 +652,10 @@ setInterval(updateTime, 10000);
   card.addEventListener('touchstart', resetTilt, { passive: true });
 })();
 
-/* ── Button ripple ── */
-document.querySelectorAll('.btn').forEach(btn => {
+/* ── Button ripple + crown burst ── */
+document.querySelectorAll('.btn, .icon-btn').forEach(btn => {
   btn.addEventListener('pointerdown', function (e) {
+    // ripple
     const r    = this.getBoundingClientRect();
     const size = Math.max(r.width, r.height);
     const dot  = document.createElement('span');
@@ -638,6 +663,8 @@ document.querySelectorAll('.btn').forEach(btn => {
     dot.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-r.left-size/2}px;top:${e.clientY-r.top-size/2}px`;
     this.appendChild(dot);
     setTimeout(() => dot.remove(), 560);
+    // crown burst
+    spawnCrownBurst(e.clientX, e.clientY);
   });
 });
 
