@@ -22,25 +22,26 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
   color: #fff;
   overscroll-behavior: none;
+  overflow: hidden;
 }
 
 /* ─── Page wrapper ─────────────────────────── */
 .page {
-  min-height: 100svh;
+  height: 100svh;
   max-width: 430px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   position: relative;
   background: #0a0a0a;
+  overflow: hidden;
 }
 
 /* ─── Hero photo ───────────────────────────── */
 .hero {
   position: relative;
   width: 100%;
-  height: 58svh;
-  min-height: 300px;
+  height: 42svh;
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -73,31 +74,32 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 20px 32px;
-  gap: 20px;
+  padding: 0 20px 16px;
+  gap: 12px;
   background: #0a0a0a;
   position: relative;
   z-index: 1;
+  overflow: hidden;
 }
 
 /* ─── Identity ─────────────────────────────── */
 .identity {
   text-align: center;
-  margin-top: -4px;
+  margin-top: 0;
   animation: fadeUp 0.5s 0.1s both;
 }
 
 .name {
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.5px;
   color: #fff;
   line-height: 1.1;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .role {
-  font-size: 14px;
+  font-size: 13px;
   color: rgba(255,255,255,0.5);
   font-weight: 400;
   letter-spacing: 0.2px;
@@ -108,13 +110,13 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
   animation: fadeUp 0.5s 0.2s both;
 }
 
 .sicon {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -138,16 +140,16 @@ html, body {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 7px;
   animation: fadeUp 0.5s 0.3s both;
 }
 
 .link-btn {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   width: 100%;
-  padding: 14px 18px;
+  padding: 10px 14px;
   border-radius: 16px;
   background: rgba(255,255,255,0.07);
   border: 1px solid rgba(255,255,255,0.1);
@@ -170,17 +172,17 @@ html, body {
 }
 
 .link-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
   display: grid;
   place-items: center;
-  font-size: 16px;
+  font-size: 14px;
   flex-shrink: 0;
 }
 
-.link-label { flex: 1; text-align: left; }
-.link-sub   { font-size: 11.5px; color: rgba(255,255,255,0.4); font-weight: 400; margin-top: 2px; }
+.link-label { flex: 1; text-align: left; font-size: 14px; }
+.link-sub   { font-size: 10.5px; color: rgba(255,255,255,0.4); font-weight: 400; margin-top: 1px; }
 
 .link-chev { color: rgba(255,255,255,0.25); font-size: 13px; }
 
@@ -197,33 +199,33 @@ html, body {
   animation: fadeUp 0.5s 0.38s both;
 }
 .press-label {
-  font-size: 10px;
+  font-size: 9px;
   letter-spacing: 1.2px;
   text-transform: uppercase;
   color: rgba(255,255,255,0.3);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   text-align: center;
 }
 .press-chips {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 7px;
   flex-wrap: wrap;
 }
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 13px;
-  border-radius: 10px;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 9px;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.09);
-  font-size: 11.5px;
+  font-size: 11px;
   color: rgba(255,255,255,0.6);
   text-decoration: none;
   transition: background 0.2s, color 0.2s;
 }
-.chip i { font-size: 11px; color: rgba(255,255,255,0.4); }
+.chip i { font-size: 10px; color: rgba(255,255,255,0.4); }
 .chip:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
 /* ─── Footer ───────────────────────────────── */
@@ -364,6 +366,23 @@ footer {
       </a>
     </div>
 
+    <!-- Press -->
+    <div class="press">
+      <div class="press-label">As seen in</div>
+      <div class="press-chips">
+        <a class="chip"
+           href="https://timesofindia.indiatimes.com/life-style/spotlight/this-mumbaikars-making-a-point-with-his-witty-signs/articleshow/88296415.cms"
+           target="_blank" rel="noopener noreferrer">
+          <i class="fa-solid fa-newspaper"></i> Times of India
+        </a>
+        <a class="chip"
+           href="https://www.whatshot.in/mumbai/mumbai-dude-with-sign-raising-words-one-board-at-a-time-c-30116"
+           target="_blank" rel="noopener noreferrer">
+          <i class="fa-solid fa-fire-flame-curved"></i> Whatshot Mumbai
+        </a>
+      </div>
+    </div>
+
     <!-- Link buttons -->
     <nav class="links">
 
@@ -413,23 +432,6 @@ footer {
       </button>
 
     </nav>
-
-    <!-- Press -->
-    <div class="press">
-      <div class="press-label">As seen in</div>
-      <div class="press-chips">
-        <a class="chip"
-           href="https://timesofindia.indiatimes.com/life-style/spotlight/this-mumbaikars-making-a-point-with-his-witty-signs/articleshow/88296415.cms"
-           target="_blank" rel="noopener noreferrer">
-          <i class="fa-solid fa-newspaper"></i> Times of India
-        </a>
-        <a class="chip"
-           href="https://www.whatshot.in/mumbai/mumbai-dude-with-sign-raising-words-one-board-at-a-time-c-30116"
-           target="_blank" rel="noopener noreferrer">
-          <i class="fa-solid fa-fire-flame-curved"></i> Whatshot Mumbai
-        </a>
-      </div>
-    </div>
 
     <footer>© <span id="yr"></span> Bharat Jagwani · Mumbai</footer>
 
