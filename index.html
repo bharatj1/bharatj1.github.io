@@ -41,8 +41,7 @@ html, body {
 .hero {
   position: relative;
   width: 100%;
-  height: 42svh;
-  flex-shrink: 0;
+  flex: 0 0 35%;
   overflow: hidden;
 }
 
@@ -74,8 +73,9 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 20px 16px;
-  gap: 12px;
+  justify-content: space-evenly;
+  padding: 0 18px;
+  gap: 0;
   background: #0a0a0a;
   position: relative;
   z-index: 1;
@@ -90,16 +90,16 @@ html, body {
 }
 
 .name {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.5px;
   color: #fff;
   line-height: 1.1;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
 .role {
-  font-size: 13px;
+  font-size: 12px;
   color: rgba(255,255,255,0.5);
   font-weight: 400;
   letter-spacing: 0.2px;
@@ -110,13 +110,13 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   animation: fadeUp 0.5s 0.2s both;
 }
 
 .sicon {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -140,17 +140,17 @@ html, body {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: clamp(4px, 1svh, 8px);
   animation: fadeUp 0.5s 0.3s both;
 }
 
 .link-btn {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  padding: 10px 14px;
-  border-radius: 16px;
+  padding: 8px 12px;
+  border-radius: 14px;
   background: rgba(255,255,255,0.07);
   border: 1px solid rgba(255,255,255,0.1);
   text-decoration: none;
@@ -172,17 +172,17 @@ html, body {
 }
 
 .link-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
-  font-size: 14px;
+  font-size: 13px;
   flex-shrink: 0;
 }
 
-.link-label { flex: 1; text-align: left; font-size: 14px; }
-.link-sub   { font-size: 10.5px; color: rgba(255,255,255,0.4); font-weight: 400; margin-top: 1px; }
+.link-label { flex: 1; text-align: left; font-size: 13px; }
+.link-sub   { font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 400; margin-top: 1px; }
 
 .link-chev { color: rgba(255,255,255,0.25); font-size: 13px; }
 
@@ -203,21 +203,21 @@ html, body {
   letter-spacing: 1.2px;
   text-transform: uppercase;
   color: rgba(255,255,255,0.3);
-  margin-bottom: 6px;
+  margin-bottom: 5px;
   text-align: center;
 }
 .press-chips {
   display: flex;
   justify-content: center;
-  gap: 7px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 11px;
-  border-radius: 9px;
+  padding: 4px 10px;
+  border-radius: 8px;
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.09);
   font-size: 11px;
