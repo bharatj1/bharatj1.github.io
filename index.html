@@ -2,557 +2,444 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Bharat Jagwani</title>
 <meta name="description" content="Bharat Jagwani – Vice President, Program & Leadership. Mumbai. Featured in Times of India & Whatshot Mumbai." />
 <meta property="og:title" content="Bharat Jagwani" />
 <meta property="og:description" content="Vice President – Program & Leadership. Mumbai, India." />
 <meta property="og:image" content="assets/bharat.jpg" />
 <meta property="og:type" content="website" />
-<meta name="theme-color" content="#06060f" />
+<meta name="theme-color" content="#0a0a0a" />
 <link rel="icon" href="assets/bharat.jpg" type="image/jpeg" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
 <style>
-/* ─── Reset & Base ─────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-  --gold:        #c9a84c;
-  --gold-bright: #e8c96a;
-  --gold-glow:   rgba(201,168,76,0.22);
-  --gold-dim:    rgba(201,168,76,0.10);
-  --gold-border: rgba(201,168,76,0.18);
-  --card-bg:     rgba(255,255,255,0.028);
-  --card-border: rgba(201,168,76,0.14);
-  --muted:       rgba(255,255,255,0.38);
+html, body {
+  height: 100%;
+  background: #0a0a0a;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  color: #fff;
+  overscroll-behavior: none;
 }
 
-body {
+/* ─── Page wrapper ─────────────────────────── */
+.page {
   min-height: 100svh;
-  background: #030307;
-  display: flex; align-items: center; justify-content: center;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color: #fff;
+  max-width: 430px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: #0a0a0a;
+}
+
+/* ─── Hero photo ───────────────────────────── */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 58svh;
+  min-height: 300px;
+  flex-shrink: 0;
   overflow: hidden;
 }
 
-/* ─── Deep Space Nebula ────────────────────────── */
-.nebula { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-.nblob {
-  position: absolute; border-radius: 50%;
-  mix-blend-mode: screen;
-  animation: nebDrift linear infinite;
-  will-change: transform;
-}
-/* Core amber cloud — centre */
-.nb1 {
-  width: 900px; height: 700px;
-  background: radial-gradient(ellipse, rgba(180,90,10,0.28) 0%, rgba(120,50,0,0.12) 45%, transparent 70%);
-  filter: blur(80px);
-  top: 10%; left: 50%; transform: translateX(-50%);
-  animation-duration: 55s;
-}
-/* Gold vein — top right */
-.nb2 {
-  width: 700px; height: 500px;
-  background: radial-gradient(ellipse, rgba(201,168,76,0.18) 0%, rgba(160,100,10,0.08) 50%, transparent 70%);
-  filter: blur(100px);
-  top: -15%; right: -10%;
-  animation-duration: 70s; animation-delay: -20s;
-}
-/* Deep crimson smoke — bottom left */
-.nb3 {
-  width: 800px; height: 600px;
-  background: radial-gradient(ellipse, rgba(100,20,0,0.22) 0%, rgba(60,10,0,0.10) 55%, transparent 72%);
-  filter: blur(90px);
-  bottom: -20%; left: -15%;
-  animation-duration: 80s; animation-delay: -35s;
-}
-/* Faint gold dust — mid left */
-.nb4 {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(220,160,40,0.10) 0%, transparent 65%);
-  filter: blur(70px);
-  top: 35%; left: -8%;
-  animation-duration: 62s; animation-delay: -10s;
-}
-/* Purple-dark void — top left */
-.nb5 {
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(40,0,60,0.30) 0%, transparent 65%);
-  filter: blur(90px);
-  top: -10%; left: 5%;
-  animation-duration: 90s; animation-delay: -50s;
-}
-/* Warm ember — bottom right */
-.nb6 {
-  width: 550px; height: 400px;
-  background: radial-gradient(ellipse, rgba(200,80,0,0.16) 0%, rgba(150,50,0,0.07) 55%, transparent 70%);
-  filter: blur(85px);
-  bottom: -5%; right: 5%;
-  animation-duration: 75s; animation-delay: -28s;
+.hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
 }
 
-@keyframes nebDrift {
-  0%   { transform: translate(0px,    0px)   scale(1);    }
-  20%  { transform: translate(30px,  -25px)  scale(1.04); }
-  40%  { transform: translate(-20px,  40px)  scale(0.97); }
-  60%  { transform: translate(40px,   20px)  scale(1.03); }
-  80%  { transform: translate(-30px, -15px)  scale(0.98); }
-  100% { transform: translate(0px,    0px)   scale(1);    }
+/* gradient fade from photo to black */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0)    0%,
+    rgba(0,0,0,0)    45%,
+    rgba(0,0,0,0.55) 70%,
+    rgba(10,10,10,1) 100%
+  );
 }
 
-/* ─── Floating crowns ──────────────────────────── */
-#particles { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
-
-.float-crown {
-  position: fixed; z-index: 2; pointer-events: none;
-  font-size: 22px; user-select: none;
-  animation: crownFloat linear infinite;
-  opacity: 0;
-  filter: drop-shadow(0 0 6px rgba(201,168,76,0.7));
-}
-@keyframes crownFloat {
-  0%   { transform: translateY(0)   rotate(-8deg)  scale(0.85); opacity: 0; }
-  8%   { opacity: 0.55; }
-  50%  { transform: translateY(-46vh) rotate(12deg) scale(1.05); opacity: 0.4; }
-  92%  { opacity: 0.15; }
-  100% { transform: translateY(-95vh) rotate(-5deg) scale(0.8);  opacity: 0; }
+/* ─── Content below photo ──────────────────── */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px 32px;
+  gap: 20px;
+  background: #0a0a0a;
+  position: relative;
+  z-index: 1;
 }
 
-/* ─── Crown burst on click ─────────────────────── */
-.crown-burst {
-  position: fixed; z-index: 999; pointer-events: none;
-  font-size: 20px; user-select: none;
-  animation: crownBurst 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
-  filter: drop-shadow(0 0 8px rgba(240,208,80,0.9));
-}
-@keyframes crownBurst {
-  0%   { transform: translate(0,0) scale(0.3) rotate(0deg); opacity: 1; }
-  60%  { opacity: 1; }
-  100% { transform: translate(var(--bx), var(--by)) scale(1.2) rotate(var(--br)); opacity: 0; }
-}
-
-/* ─── Card ─────────────────────────────────────── */
-.card {
-  position: relative; z-index: 10;
-  width: min(92vw, 390px);
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 28px;
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  box-shadow:
-    0 0 0 1px rgba(201,168,76,0.07) inset,
-    0 40px 100px rgba(0,0,0,0.85);
-  padding: 26px 20px 20px;
-  display: flex; flex-direction: column; gap: 18px;
+/* ─── Identity ─────────────────────────────── */
+.identity {
   text-align: center;
-  animation: cardIn 0.75s cubic-bezier(0.16,1,0.3,1) both, cardBreathe 8s 1.5s ease-in-out infinite;
-  transform-style: preserve-3d;
-  will-change: transform;
-  transition: transform 0.12s ease;
+  margin-top: -4px;
+  animation: fadeUp 0.5s 0.1s both;
 }
-@keyframes cardBreathe {
-  0%,100% { box-shadow: 0 0 0 1px rgba(201,168,76,0.07) inset, 0 40px 100px rgba(0,0,0,0.85), 0 0 0px var(--gold-glow); }
-  50%     { box-shadow: 0 0 0 1px rgba(201,168,76,0.13) inset, 0 40px 100px rgba(0,0,0,0.85), 0 0 60px var(--gold-glow); }
-}
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(36px) scale(0.95); }
-  to   { opacity: 1; transform: translateY(0)    scale(1);    }
-}
-
-/* ─── Avatar ───────────────────────────────────── */
-.avatar-wrap {
-  position: relative; width: 96px; height: 96px;
-  margin: 0 auto;
-  animation: fadeUp 0.5s 0.15s both;
-}
-.avatar-ring {
-  position: absolute; inset: -4px; border-radius: 50%;
-  background: conic-gradient(from 0deg, #6b4e10, #c9a84c, #f0d080, #e8c96a, #c9a84c, #6b4e10);
-  animation: spin 6s linear infinite;
-}
-.avatar-mask {
-  position: absolute; inset: 3px; border-radius: 50%;
-  background: #030307; overflow: hidden;
-}
-.avatar-mask img {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%; object-fit: cover;
-  border-radius: 50%;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ─── Identity ─────────────────────────────────── */
-.identity { display: flex; flex-direction: column; align-items: center; gap: 8px; animation: fadeUp 0.5s 0.25s both; }
 
 .name {
-  font-size: 28px; font-weight: 800; letter-spacing: -0.5px;
-  background: linear-gradient(160deg, #fff 30%, var(--gold-bright) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: #fff;
+  line-height: 1.1;
+  margin-bottom: 6px;
 }
 
-.badge {
-  display: inline-flex; align-items: center; gap: 7px;
-  background: rgba(201,168,76,0.08);
-  border: 1px solid var(--gold-border);
-  border-radius: 999px; padding: 5px 14px;
-}
-.badge-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--gold);
-  animation: glow 2.5s ease-in-out infinite;
-}
-@keyframes glow {
-  0%,100% { box-shadow: 0 0 0 0 var(--gold-glow); opacity: 1; }
-  50%      { box-shadow: 0 0 0 6px transparent;     opacity: 0.55; }
-}
-.badge-text {
-  font-size: 10.5px; font-weight: 700; letter-spacing: 0.9px;
-  text-transform: uppercase; color: var(--gold);
+.role {
+  font-size: 14px;
+  color: rgba(255,255,255,0.5);
+  font-weight: 400;
+  letter-spacing: 0.2px;
 }
 
-.location-time {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 11.5px; color: var(--muted);
+/* ─── Social icons row ─────────────────────── */
+.social-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  animation: fadeUp 0.5s 0.2s both;
 }
-.location-time i { font-size: 10px; }
 
-/* ─── Press ────────────────────────────────────── */
-.press { animation: fadeUp 0.5s 0.38s both; }
-.press-label { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-.press-chips { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.sicon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  color: rgba(255,255,255,0.85);
+  font-size: 18px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  transition: background 0.2s, transform 0.2s, color 0.2s;
+}
+
+.sicon:hover,
+.sicon:active {
+  background: rgba(255,255,255,0.16);
+  transform: scale(1.1);
+  color: #fff;
+}
+
+/* ─── Link pills ───────────────────────────── */
+.links {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: fadeUp 0.5s 0.3s both;
+}
+
+.link-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  text-decoration: none;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s, transform 0.15s, border-color 0.2s;
+}
+
+.link-btn:hover,
+.link-btn:active {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.2);
+  transform: scale(0.99);
+}
+
+.link-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.link-label { flex: 1; text-align: left; }
+.link-sub   { font-size: 11.5px; color: rgba(255,255,255,0.4); font-weight: 400; margin-top: 2px; }
+
+.link-chev { color: rgba(255,255,255,0.25); font-size: 13px; }
+
+/* icon colour variants */
+.lnk-wa    .link-icon { background: rgba(37,211,102,0.15); color: #25d366; }
+.lnk-ig    .link-icon { background: rgba(225,48,108,0.15); color: #e1306c; }
+.lnk-li    .link-icon { background: rgba(10,102,194,0.15); color: #4da8d8; }
+.lnk-phone .link-icon { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+.lnk-loc   .link-icon { background: rgba(255,180,50,0.12); color: #f5b942; }
+
+/* press row */
+.press {
+  width: 100%;
+  animation: fadeUp 0.5s 0.38s both;
+}
+.press-label {
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-bottom: 8px;
+  text-align: center;
+}
+.press-chips {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 .chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 12px; border-radius: 10px;
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-  font-size: 12px; color: rgba(255,255,255,0.78); text-decoration: none;
-  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.09);
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
 }
-.chip i { font-size: 12px; color: var(--gold); }
-.chip:hover { background: rgba(255,255,255,0.11); transform: translateY(-2px); color: #fff; }
+.chip i { font-size: 11px; color: rgba(255,255,255,0.4); }
+.chip:hover { background: rgba(255,255,255,0.1); color: #fff; }
 
-/* ─── Icon row ─────────────────────────────────── */
-.icons { display: flex; justify-content: center; gap: 10px; animation: fadeUp 0.5s 0.48s both; }
-.icon-btn {
-  width: 44px; height: 44px; border-radius: 14px;
-  display: grid; place-items: center; font-size: 17px;
-  text-decoration: none; color: rgba(255,255,255,0.72);
-  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
-  position: relative; overflow: hidden;
-  transition: transform 0.22s, color 0.22s, box-shadow 0.22s;
-}
-.icon-btn i { position: relative; z-index: 1; }
-.icon-btn::before {
-  content: ''; position: absolute; inset: 0; opacity: 0;
-  transition: opacity 0.22s;
-  border-radius: inherit;
-}
-.icon-btn:hover { transform: translateY(-3px) scale(1.1); color: #fff; }
-.icon-btn:hover::before { opacity: 1; }
-
-.icon-btn.phone::before        { background: linear-gradient(135deg,#25d366,#128c7e); }
-.icon-btn.phone:hover          { box-shadow: 0 6px 20px rgba(37,211,102,0.35); }
-.icon-btn.ig-pub::before       { background: linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); }
-.icon-btn.ig-pub:hover         { box-shadow: 0 6px 20px rgba(220,39,67,0.35); }
-.icon-btn.ig-pers::before      { background: linear-gradient(135deg,#f77737,#fcaf45,#ffdc80); }
-.icon-btn.ig-pers:hover        { box-shadow: 0 6px 20px rgba(247,119,55,0.35); }
-.icon-btn.wa::before           { background: linear-gradient(135deg,#25d366,#128c7e); }
-.icon-btn.wa:hover             { box-shadow: 0 6px 20px rgba(37,211,102,0.35); }
-.icon-btn.li::before           { background: #0077b5; }
-.icon-btn.li:hover             { box-shadow: 0 6px 20px rgba(0,119,181,0.4); }
-
-/* ─── Link buttons ─────────────────────────────── */
-.links { display: flex; flex-direction: column; gap: 8px; }
-
-.btn {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 14px; border-radius: 16px;
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-  text-decoration: none; color: #fff;
-  cursor: pointer; font-family: inherit; width: 100%;
-  position: relative; overflow: hidden;
-  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
-  animation: fadeUp 0.45s both;
-}
-.btn:nth-child(1) { animation-delay: 0.55s; }
-.btn:nth-child(2) { animation-delay: 0.63s; }
-.btn:nth-child(3) { animation-delay: 0.71s; }
-.btn:nth-child(4) { animation-delay: 0.79s; }
-.btn:nth-child(5) { animation-delay: 0.87s; }
-
-/* shimmer sweep */
-.btn::after {
-  content: ''; position: absolute;
-  top: 0; left: -100%; width: 60%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.055), transparent);
-  transition: none; pointer-events: none;
-}
-.btn:hover::after { animation: shimmer 0.55s ease forwards; }
-@keyframes shimmer { to { left: 150%; } }
-
-.btn:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.17); }
-
-/* brand glow per button */
-.btn-wa:hover   { box-shadow: 0 8px 28px rgba(37,211,102,0.18); }
-.btn-ig:hover   { box-shadow: 0 8px 28px rgba(220,39,67,0.18); }
-.btn-li:hover   { box-shadow: 0 8px 28px rgba(0,119,181,0.20); }
-.btn-loc:hover  { box-shadow: 0 8px 28px rgba(240,180,41,0.20); }
-
-/* icon box inside button */
-.btn-icon {
-  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
-  display: grid; place-items: center; font-size: 15px;
-}
-.btn-wa  .btn-icon { background: rgba(37,211,102,0.14); color: #25d366; }
-.btn-ig  .btn-icon { background: rgba(220,39,67,0.14);  color: #e1306c; }
-.btn-li  .btn-icon { background: rgba(0,119,181,0.16);  color: #4da8d8; }
-.btn-loc .btn-icon { background: var(--gold-dim);        color: var(--gold); }
-
-.btn-text { text-align: left; flex: 1; margin-left: 12px; }
-.btn-label { font-size: 13.5px; font-weight: 700; line-height: 1.2; }
-.btn-sub   { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.chev { opacity: 0.3; font-size: 16px; margin-left: 4px; }
-
-/* ─── Footer ───────────────────────────────────── */
+/* ─── Footer ───────────────────────────────── */
 footer {
-  font-size: 10.5px; color: rgba(255,255,255,0.25);
-  animation: fadeUp 0.5s 1s both;
+  font-size: 10px;
+  color: rgba(255,255,255,0.2);
+  text-align: center;
+  letter-spacing: 0.3px;
+  animation: fadeUp 0.5s 0.45s both;
 }
 
-/* ─── Utility ──────────────────────────────────── */
+/* ─── Utility ──────────────────────────────── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── Passcode modal ───────────────────────────── */
+/* ─── Ripple ───────────────────────────────── */
+@keyframes ripple { to { transform: scale(3.5); opacity: 0; } }
+.ripple-dot {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  transform: scale(0);
+  pointer-events: none;
+  animation: ripple 0.5s ease forwards;
+}
+
+/* ─── Passcode modal ───────────────────────── */
 .modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: none; align-items: center; justify-content: center;
   z-index: 200;
 }
 .modal-overlay.open { display: flex; }
 
 .modal-box {
-  background: rgba(14,14,22,0.95);
-  border: 1px solid rgba(255,255,255,0.12);
-  padding: 26px 22px; border-radius: 22px;
-  width: 85%; max-width: 300px; text-align: center;
-  box-shadow: 0 0 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05) inset;
+  background: #161616;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 28px 24px;
+  border-radius: 24px;
+  width: 86%;
+  max-width: 300px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.7);
   animation: fadeUp 0.3s cubic-bezier(0.16,1,0.3,1) both;
 }
 .modal-box h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
-.modal-box p  { font-size: 12.5px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+.modal-box p  { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 16px; line-height: 1.5; }
 
 .modal-box input[type=password] {
-  width: 100%; padding: 11px 14px; border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: rgba(255,255,255,0.07); color: #fff;
-  font-size: 15px; font-family: inherit; letter-spacing: 3px;
-  outline: none; transition: border-color 0.2s; margin-bottom: 10px;
+  width: 100%; padding: 12px 14px; border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.13);
+  background: rgba(255,255,255,0.06);
+  color: #fff; font-size: 16px; font-family: inherit;
+  letter-spacing: 4px; outline: none;
+  transition: border-color 0.2s; margin-bottom: 10px;
   text-align: center;
 }
-.modal-box input[type=password]:focus { border-color: rgba(240,180,41,0.5); }
-.modal-box input[type=password]::placeholder { letter-spacing: 0; color: rgba(255,255,255,0.25); font-size: 13px; }
+.modal-box input[type=password]:focus { border-color: rgba(255,255,255,0.3); }
+.modal-box input[type=password]::placeholder { letter-spacing: 0; color: rgba(255,255,255,0.22); font-size: 13px; }
 
 .modal-err { font-size: 12px; color: #ff6b6b; min-height: 16px; margin-bottom: 10px; }
 
 .modal-actions { display: flex; gap: 8px; }
 .modal-actions button {
-  flex: 1; padding: 10px; border-radius: 11px; border: none;
+  flex: 1; padding: 11px; border-radius: 12px; border: none;
   font-size: 13px; font-weight: 700; font-family: inherit;
   cursor: pointer; transition: opacity 0.2s, transform 0.15s;
 }
 .modal-actions button:hover { opacity: 0.85; transform: scale(0.98); }
-.btn-confirm { background: var(--gold); color: #060608; }
-.btn-cancel  { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+.btn-confirm { background: #fff; color: #0a0a0a; }
+.btn-cancel  { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
 
 .shake { animation: shake 0.35s ease both; }
 @keyframes shake {
   20%  { transform: translateX(-7px); }
-  40%  { transform: translateX(7px);  }
+  40%  { transform: translateX(7px); }
   60%  { transform: translateX(-4px); }
-  80%  { transform: translateX(4px);  }
-  100% { transform: translateX(0);    }
+  80%  { transform: translateX(4px); }
+  100% { transform: translateX(0); }
 }
 
-/* ─── Location popup ───────────────────────────── */
-.popup { position: fixed; inset: 0; background: rgba(0,0,0,0.72); display: none; align-items: center; justify-content: center; z-index: 100; }
+/* ─── Location popup ───────────────────────── */
+.popup { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 100; }
 .popup.open { display: flex; }
 .popup-content {
-  background: rgba(12,12,20,0.96); border: 1px solid rgba(255,255,255,0.1);
-  padding: 24px; border-radius: 20px; text-align: center;
-  width: 85%; max-width: 310px;
-  box-shadow: 0 0 40px rgba(0,0,0,0.6);
+  background: #161616; border: 1px solid rgba(255,255,255,0.1);
+  padding: 26px; border-radius: 22px; text-align: center;
+  width: 86%; max-width: 310px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.6);
   animation: fadeUp 0.3s cubic-bezier(0.16,1,0.3,1) both;
 }
 .popup-content h3    { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
-.popup-content p     { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
-.popup-content a     { display: inline-block; background: var(--gold); color: #060608; padding: 9px 18px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 700; transition: opacity 0.2s; }
+.popup-content p     { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; margin-bottom: 16px; }
+.popup-content a     { display: inline-block; background: #fff; color: #0a0a0a; padding: 10px 20px; border-radius: 12px; text-decoration: none; font-size: 13px; font-weight: 700; transition: opacity 0.2s; }
 .popup-content a:hover { opacity: 0.85; }
-.popup-content button { margin-top: 12px; background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; font-family: inherit; }
-
-/* ─── Ripple ───────────────────────────────────── */
-@keyframes ripple {
-  to { transform: scale(3); opacity: 0; }
-}
-.ripple-dot {
-  position: absolute; border-radius: 50%;
-  background: rgba(255,255,255,0.18);
-  transform: scale(0); pointer-events: none;
-  animation: ripple 0.55s ease forwards;
-}
-
-/* ─── Responsive ───────────────────────────────── */
-@media (max-height: 700px) {
-  .card { padding: 18px 16px; gap: 13px; }
-  .avatar-wrap { width: 78px; height: 78px; }
-  .name { font-size: 22px; }
-  .press { display: none; }
-}
-@media (max-height: 600px) {
-  .icons { display: none; }
-}
+.popup-content button { margin-top: 12px; background: none; border: none; color: rgba(255,255,255,0.35); font-size: 12px; cursor: pointer; font-family: inherit; }
 </style>
 </head>
 
 <body>
+<div class="page">
 
-<!-- Deep Space Nebula -->
-<div class="nebula">
-  <div class="nblob nb1"></div>
-  <div class="nblob nb2"></div>
-  <div class="nblob nb3"></div>
-  <div class="nblob nb4"></div>
-  <div class="nblob nb5"></div>
-  <div class="nblob nb6"></div>
+  <!-- Hero photo -->
+  <div class="hero">
+    <img src="assets/bharat.jpg" alt="Bharat Jagwani" loading="eager" decoding="async" />
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Identity -->
+    <div class="identity">
+      <h1 class="name">Bharat Jagwani</h1>
+      <div class="role">VP · Program &amp; Leadership &nbsp;·&nbsp; <span id="mumbai-time">Mumbai</span></div>
+    </div>
+
+    <!-- Social icons -->
+    <div class="social-icons">
+      <a class="sicon" href="tel:+919920906277" aria-label="Call Bharat">
+        <i class="fa-solid fa-phone"></i>
+      </a>
+      <a class="sicon" href="https://instagram.com/brat_board" target="_blank" rel="noopener noreferrer" aria-label="@brat_board">
+        <i class="fa-brands fa-instagram"></i>
+      </a>
+      <a class="sicon" href="https://instagram.com/brat_ology" target="_blank" rel="noopener noreferrer" aria-label="@brat_ology">
+        <i class="fa-brands fa-instagram"></i>
+      </a>
+      <a class="sicon" href="https://wa.me/919920906277?text=Hi%20Bharat" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+        <i class="fa-brands fa-whatsapp"></i>
+      </a>
+      <a class="sicon" href="https://www.linkedin.com/in/bharat-jagwani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+        <i class="fa-brands fa-linkedin"></i>
+      </a>
+    </div>
+
+    <!-- Link buttons -->
+    <nav class="links">
+
+      <a class="link-btn lnk-wa" href="https://wa.me/919920906277?text=Hi%20Bharat" target="_blank" rel="noopener noreferrer">
+        <span class="link-icon"><i class="fa-brands fa-whatsapp"></i></span>
+        <span class="link-label">
+          <div>WhatsApp</div>
+          <div class="link-sub">Message me instantly</div>
+        </span>
+        <i class="fa-solid fa-chevron-right link-chev"></i>
+      </a>
+
+      <a class="link-btn lnk-ig" href="https://instagram.com/brat_board" target="_blank" rel="noopener noreferrer">
+        <span class="link-icon"><i class="fa-brands fa-instagram"></i></span>
+        <span class="link-label">
+          <div>@brat_board</div>
+          <div class="link-sub">Public Instagram Page</div>
+        </span>
+        <i class="fa-solid fa-chevron-right link-chev"></i>
+      </a>
+
+      <a class="link-btn lnk-ig" href="https://instagram.com/brat_ology" target="_blank" rel="noopener noreferrer">
+        <span class="link-icon"><i class="fa-brands fa-instagram"></i></span>
+        <span class="link-label">
+          <div>@brat_ology</div>
+          <div class="link-sub">Personal Instagram</div>
+        </span>
+        <i class="fa-solid fa-chevron-right link-chev"></i>
+      </a>
+
+      <a class="link-btn lnk-li" href="https://www.linkedin.com/in/bharat-jagwani" target="_blank" rel="noopener noreferrer">
+        <span class="link-icon"><i class="fa-brands fa-linkedin"></i></span>
+        <span class="link-label">
+          <div>LinkedIn</div>
+          <div class="link-sub">View professional profile</div>
+        </span>
+        <i class="fa-solid fa-chevron-right link-chev"></i>
+      </a>
+
+      <button class="link-btn lnk-loc" onclick="openPasscodeModal()">
+        <span class="link-icon"><i class="fa-solid fa-location-dot"></i></span>
+        <span class="link-label">
+          <div>My Location</div>
+          <div class="link-sub">Passcode protected</div>
+        </span>
+        <i class="fa-solid fa-chevron-right link-chev"></i>
+      </button>
+
+    </nav>
+
+    <!-- Press -->
+    <div class="press">
+      <div class="press-label">As seen in</div>
+      <div class="press-chips">
+        <a class="chip"
+           href="https://timesofindia.indiatimes.com/life-style/spotlight/this-mumbaikars-making-a-point-with-his-witty-signs/articleshow/88296415.cms"
+           target="_blank" rel="noopener noreferrer">
+          <i class="fa-solid fa-newspaper"></i> Times of India
+        </a>
+        <a class="chip"
+           href="https://www.whatshot.in/mumbai/mumbai-dude-with-sign-raising-words-one-board-at-a-time-c-30116"
+           target="_blank" rel="noopener noreferrer">
+          <i class="fa-solid fa-fire-flame-curved"></i> Whatshot Mumbai
+        </a>
+      </div>
+    </div>
+
+    <footer>© <span id="yr"></span> Bharat Jagwani · Mumbai</footer>
+
+  </div>
 </div>
-
-<!-- Particles -->
-<canvas id="particles"></canvas>
-
-<!-- Card -->
-<section class="card" id="card">
-
-  <!-- Avatar -->
-  <div class="avatar-wrap">
-    <div class="avatar-ring"></div>
-    <div class="avatar-mask">
-      <img src="assets/bharat.jpg" alt="Bharat Jagwani" loading="eager" decoding="async" />
-    </div>
-  </div>
-
-  <!-- Identity -->
-  <div class="identity">
-    <h1 class="name">Bharat Jagwani</h1>
-    <div class="badge">
-      <span class="badge-dot"></span>
-      <span class="badge-text">VP · Program &amp; Leadership</span>
-    </div>
-    <div class="location-time">
-      <i class="fa-solid fa-location-dot"></i>
-      <span id="mumbai-time">Mumbai, India</span>
-    </div>
-  </div>
-
-  <!-- Press -->
-  <div class="press">
-    <div class="press-label">As seen in</div>
-    <div class="press-chips">
-      <a class="chip"
-         href="https://timesofindia.indiatimes.com/life-style/spotlight/this-mumbaikars-making-a-point-with-his-witty-signs/articleshow/88296415.cms"
-         target="_blank" rel="noopener noreferrer">
-        <i class="fa-solid fa-newspaper"></i> Times of India
-      </a>
-      <a class="chip"
-         href="https://www.whatshot.in/mumbai/mumbai-dude-with-sign-raising-words-one-board-at-a-time-c-30116"
-         target="_blank" rel="noopener noreferrer">
-        <i class="fa-solid fa-fire-flame-curved"></i> Whatshot Mumbai
-      </a>
-    </div>
-  </div>
-
-  <!-- Icon row -->
-  <div class="icons">
-    <a class="icon-btn phone" href="tel:+919920906277" aria-label="Call Bharat">
-      <i class="fa-solid fa-phone"></i>
-    </a>
-    <a class="icon-btn ig-pub" href="https://instagram.com/brat_board" target="_blank" rel="noopener noreferrer" aria-label="Instagram brat_board – Public Page">
-      <i class="fa-brands fa-instagram"></i>
-    </a>
-    <a class="icon-btn ig-pers" href="https://instagram.com/brat_ology" target="_blank" rel="noopener noreferrer" aria-label="Instagram brat_ology – Personal">
-      <i class="fa-brands fa-instagram"></i>
-    </a>
-    <a class="icon-btn wa" href="https://wa.me/919920906277?text=Hi%20Bharat" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
-      <i class="fa-brands fa-whatsapp"></i>
-    </a>
-    <a class="icon-btn li" href="https://www.linkedin.com/in/bharat-jagwani" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-      <i class="fa-brands fa-linkedin"></i>
-    </a>
-  </div>
-
-  <!-- Link buttons -->
-  <nav class="links">
-    <a class="btn btn-wa" href="https://wa.me/919920906277?text=Hi%20Bharat" target="_blank" rel="noopener noreferrer">
-      <span class="btn-icon"><i class="fa-brands fa-whatsapp"></i></span>
-      <span class="btn-text">
-        <div class="btn-label">WhatsApp</div>
-        <div class="btn-sub">Message me instantly</div>
-      </span>
-      <span class="chev"><i class="fa-solid fa-chevron-right"></i></span>
-    </a>
-
-    <a class="btn btn-ig" href="https://instagram.com/brat_board" target="_blank" rel="noopener noreferrer">
-      <span class="btn-icon"><i class="fa-brands fa-instagram"></i></span>
-      <span class="btn-text">
-        <div class="btn-label">@brat_board</div>
-        <div class="btn-sub">Public Instagram Page</div>
-      </span>
-      <span class="chev"><i class="fa-solid fa-chevron-right"></i></span>
-    </a>
-
-    <a class="btn btn-ig" href="https://instagram.com/brat_ology" target="_blank" rel="noopener noreferrer">
-      <span class="btn-icon"><i class="fa-brands fa-instagram"></i></span>
-      <span class="btn-text">
-        <div class="btn-label">@brat_ology</div>
-        <div class="btn-sub">Personal Instagram</div>
-      </span>
-      <span class="chev"><i class="fa-solid fa-chevron-right"></i></span>
-    </a>
-
-    <a class="btn btn-li" href="https://www.linkedin.com/in/bharat-jagwani" target="_blank" rel="noopener noreferrer">
-      <span class="btn-icon"><i class="fa-brands fa-linkedin"></i></span>
-      <span class="btn-text">
-        <div class="btn-label">LinkedIn</div>
-        <div class="btn-sub">View professional profile</div>
-      </span>
-      <span class="chev"><i class="fa-solid fa-chevron-right"></i></span>
-    </a>
-
-    <button class="btn btn-loc" onclick="openPasscodeModal()">
-      <span class="btn-icon"><i class="fa-solid fa-location-dot"></i></span>
-      <span class="btn-text">
-        <div class="btn-label">My Location</div>
-        <div class="btn-sub">Passcode protected</div>
-      </span>
-      <span class="chev"><i class="fa-solid fa-chevron-right"></i></span>
-    </button>
-  </nav>
-
-  <footer>© <span id="yr"></span> Bharat Jagwani · Mumbai</footer>
-
-</section>
 
 <!-- Passcode modal -->
 <div class="modal-overlay" id="passcodeModal" onclick="handleOverlayClick(event)">
   <div class="modal-box" id="passcodeBox">
-    <h3><i class="fa-solid fa-shield-halved" style="color:var(--gold);margin-right:7px;font-size:15px"></i>Private Location</h3>
+    <h3>🔒 Private Location</h3>
     <p>Enter the passcode to unlock Bharat's location.</p>
     <input type="password" id="passcodeInput" placeholder="Enter passcode" maxlength="20"
            onkeydown="if(event.key==='Enter')confirmPasscode()" />
@@ -576,99 +463,30 @@ footer {
 </div>
 
 <script>
-/* ── Year ── */
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-/* ── Live Mumbai time ── */
 function updateTime() {
   const t = new Date().toLocaleTimeString('en-IN', {
     timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: true
   });
-  document.getElementById('mumbai-time').textContent = `Mumbai · ${t} IST`;
+  document.getElementById('mumbai-time').textContent = t + ' IST';
 }
 updateTime();
 setInterval(updateTime, 10000);
 
-/* ── Floating crown system ── */
-(function () {
-  const COUNT = 18;
-  const SIZES = ['16px','18px','20px','24px','14px','22px'];
-
-  function spawnCrown() {
-    const el = document.createElement('div');
-    el.className = 'float-crown';
-    el.textContent = '👑';
-    const x = Math.random() * 96 + 2; // 2–98vw
-    const dur = Math.random() * 14 + 12; // 12–26s
-    const delay = Math.random() * -26;
-    el.style.cssText = `left:${x}vw; bottom:-40px; font-size:${SIZES[Math.floor(Math.random()*SIZES.length)]}; animation-duration:${dur}s; animation-delay:${delay}s;`;
-    document.body.appendChild(el);
-  }
-
-  for (let i = 0; i < COUNT; i++) spawnCrown();
-})();
-
-/* ── Crown burst on click ── */
-function spawnCrownBurst(x, y) {
-  const COUNT = 8;
-  for (let i = 0; i < COUNT; i++) {
-    const el = document.createElement('div');
-    el.className = 'crown-burst';
-    el.textContent = '👑';
-    const angle = (i / COUNT) * Math.PI * 2;
-    const dist  = Math.random() * 70 + 50;
-    const bx    = Math.cos(angle) * dist;
-    const by    = Math.sin(angle) * dist - 30;
-    const br    = (Math.random() - 0.5) * 60 + 'deg';
-    el.style.cssText = `left:${x}px; top:${y}px; --bx:${bx}px; --by:${by}px; --br:${br}; animation-delay:${i*0.04}s; font-size:${Math.random()*10+14}px;`;
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 1000);
-  }
-}
-
-/* ── 3D card tilt on mouse ── */
-(function () {
-  const card = document.getElementById('card');
-  let resetTimer;
-
-  card.addEventListener('mousemove', e => {
-    clearTimeout(resetTimer);
-    const r   = card.getBoundingClientRect();
-    const cx  = r.left + r.width  / 2;
-    const cy  = r.top  + r.height / 2;
-    const rx  = ((e.clientY - cy) / (r.height / 2)) * -6;
-    const ry  = ((e.clientX - cx) / (r.width  / 2)) *  6;
-    card.style.transition = 'transform 0.1s ease';
-    card.style.transform  = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) scale(1.012)`;
-  });
-
-  function resetTilt() {
-    card.style.transition = 'transform 0.6s cubic-bezier(0.23,1,0.32,1)';
-    card.style.transform  = '';
-  }
-
-  card.addEventListener('mouseleave', resetTilt);
-  // Touch: no tilt on mobile
-  card.addEventListener('touchstart', resetTilt, { passive: true });
-})();
-
-/* ── Button ripple + crown burst ── */
-document.querySelectorAll('.btn, .icon-btn').forEach(btn => {
+/* ripple on buttons */
+document.querySelectorAll('.link-btn, .sicon').forEach(btn => {
   btn.addEventListener('pointerdown', function (e) {
-    // ripple
     const r    = this.getBoundingClientRect();
     const size = Math.max(r.width, r.height);
     const dot  = document.createElement('span');
     dot.className = 'ripple-dot';
     dot.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-r.left-size/2}px;top:${e.clientY-r.top-size/2}px`;
     this.appendChild(dot);
-    setTimeout(() => dot.remove(), 560);
-    // crown burst
-    spawnCrownBurst(e.clientX, e.clientY);
+    setTimeout(() => dot.remove(), 520);
   });
 });
 
-/* ── Passcode modal ── */
 function openPasscodeModal() {
   document.getElementById('passcodeInput').value = '';
   document.getElementById('passcodeError').textContent = '';
