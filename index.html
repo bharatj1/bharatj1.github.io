@@ -64,6 +64,23 @@ html, body {
 @keyframes blink { 50% { opacity: 0.25; } }
 .hud-online { color: rgba(0,255,150,0.75); animation: blink 2s infinite; }
 
+/* ── Dark vignette behind all content — particles visible at edges ── */
+.page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 85% 75% at 50% 52%,
+    rgba(3,3,8,0.78) 0%,
+    rgba(3,3,8,0.55) 45%,
+    rgba(3,3,8,0.15) 72%,
+    transparent 100%
+  );
+}
+.scroll, .hud { position: relative; z-index: 1; }
+
 /* ── Main scroll area ────────────────── */
 .scroll {
   flex: 1;
@@ -141,11 +158,12 @@ html, body {
   color: #fff;
   animation: glitch 10s infinite;
   line-height: 1.1; margin-bottom: 4px;
+  text-shadow: 0 0 30px rgba(0,212,255,0.35), 0 2px 16px rgba(0,0,0,1), 0 0 2px rgba(0,0,0,1);
 }
 .role {
   font-size: 10px; font-weight: 500; letter-spacing: 0.8px;
-  text-transform: uppercase; color: rgba(0,212,255,0.65);
-  text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+  text-transform: uppercase; color: rgba(0,212,255,0.75);
+  text-shadow: 0 1px 8px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9);
 }
 
 /* ── Social icons ────────────────────── */
@@ -195,7 +213,7 @@ html, body {
 .link-btn {
   display: flex; align-items: center; gap: 12px;
   width:100%; padding: 10px 14px; border-radius: 16px;
-  background: rgba(3,3,8,0.7);
+  background: rgba(3,3,8,0.82);
   border: 1px solid rgba(0,212,255,0.13);
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
   text-decoration: none; color: #fff;
@@ -525,23 +543,23 @@ footer {
 
     project();
 
-    /* ── TRAIL CLEAR — partial alpha, never a full black frame ── */
+    /* ── TRAIL CLEAR — faster fade keeps canvas dark, prevents bloom ── */
     ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = 0.28;
+    ctx.globalAlpha = 0.5;
     ctx.fillStyle   = '#030308';
     ctx.fillRect(0, 0, C.width, C.height);
 
-    /* ── LINES — 3 distance buckets, single path each ── */
+    /* ── LINES — subtle, thin, 3 distance buckets ── */
     ctx.globalCompositeOperation = 'lighter';
     var buckets = [
-      {al:0.55, lw:0.9, lo:0,      hi:T2*0.35},
-      {al:0.32, lw:0.6, lo:T2*0.35, hi:T2*0.68},
-      {al:0.16, lw:0.4, lo:T2*0.68, hi:T2},
+      {al:0.22, lw:0.7, lo:0,       hi:T2*0.35},
+      {al:0.12, lw:0.5, lo:T2*0.35, hi:T2*0.68},
+      {al:0.06, lw:0.3, lo:T2*0.68, hi:T2},
     ];
     for (var b=0; b<3; b++) {
       var bk = buckets[b];
       ctx.globalAlpha = bk.al;
-      ctx.strokeStyle = '#00b8ff';
+      ctx.strokeStyle = '#00c8ff';
       ctx.lineWidth   = bk.lw;
       ctx.beginPath();
       for (var i=0; i<N; i++) {
@@ -557,13 +575,13 @@ footer {
       ctx.stroke();
     }
 
-    /* ── PARTICLES — additive glow sprites ── */
+    /* ── PARTICLES — small refined glow, not overwhelming ── */
     ctx.globalCompositeOperation = 'lighter';
     for (var i=0; i<N; i++) {
       var p    = proj[i];
       var pulse = (Math.sin(tick*2.2 + pts[i].ph) + 1) * 0.5;
-      var sz   = (28 + pulse*16) * p.sc;   /* half-size of drawn sprite */
-      ctx.globalAlpha = Math.min(p.sc * 1.1, 0.92);
+      var sz   = (10 + pulse*5) * p.sc;   /* much smaller half-size */
+      ctx.globalAlpha = Math.min(p.sc * 0.55, 0.5);  /* dimmer */
       ctx.drawImage(SP, p.sx-sz, p.sy-sz, sz*2, sz*2);
     }
 
