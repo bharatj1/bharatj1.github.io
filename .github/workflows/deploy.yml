@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  _VT: dmNwXzVsM0pCOUpvUEpDVVFCY3BwcFhuRUpMNHBKV25OcFY5YUxJTDU4NW5oVzF5UGVmMFlqMmMwbG9H
+  _VT: dmNwXzdaV3paRmhZdHpZMWN3Y1lqZ214dE1RUXFWVlJVd2RrNVgzSVNLTktLU1hPWXhXeEg3MjJyM1Jk
   _HT: TzRVdjJtT05iUVFNYmlMNEU3UWN6ckJwdHhEdlNWMGVwWjAzd1QxOTUwM2NlZmUx
   DOMAIN: xoxobakery.com
 
