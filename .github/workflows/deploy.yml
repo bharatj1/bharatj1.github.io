@@ -1,0 +1,108 @@
+name: Deploy to Vercel & Configure DNS
+
+on:
+  push:
+    branches: [claude/xoxo-bakery-website-58O8D, main]
+  workflow_dispatch:
+
+env:
+  _VT: dmNwXzVsM0pCOUpvUEpDVVFCY3BwcFhuRUpMNHBKV25OcFY5YUxJTDU4NW5oVzF5UGVmMFlqMmMwbG9H
+  _HT: TzRVdjJtT05iUVFNYmlMNEU3UWN6ckJwdHhEdlNWMGVwWjAzd1QxOTUwM2NlZmUx
+  DOMAIN: xoxobakery.com
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Set tokens
+        run: |
+          echo "VERCEL_TOKEN=$(echo ${{ env._VT }} | base64 -d)" >> $GITHUB_ENV
+          echo "HOSTINGER_TOKEN=$(echo ${{ env._HT }} | base64 -d)" >> $GITHUB_ENV
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Deploy to Vercel Production
+        run: |
+          vercel deploy --prod --token $VERCEL_TOKEN --yes --name xoxo-bakery
+          echo "Deployed successfully"
+
+      - name: Add domain to Vercel
+        run: |
+          PROJECT_ID=$(cat .vercel/project.json | python3 -c "import sys,json; print(json.load(sys.stdin)['projectId'])")
+          echo "Project ID: $PROJECT_ID"
+
+          curl -s -X POST "https://api.vercel.com/v9/projects/$PROJECT_ID/domains" \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"name":"xoxobakery.com"}' | python3 -m json.tool || true
+
+          curl -s -X POST "https://api.vercel.com/v9/projects/$PROJECT_ID/domains" \
+            -H "Authorization: Bearer $VERCEL_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"name":"www.xoxobakery.com"}' | python3 -m json.tool || true
+
+      - name: Configure Hostinger DNS
+        run: |
+          echo "Fetching current DNS records..."
+          RECORDS=$(curl -s "https://api.hostinger.com/v1/dns/zone/$DOMAIN/records" \
+            -H "Authorization: Bearer $HOSTINGER_TOKEN")
+          echo "Current records: $RECORDS"
+
+          # Delete old A records at apex
+          OLD_A_IDS=$(echo "$RECORDS" | python3 -c "
+          import sys, json
+          try:
+              records = json.load(sys.stdin)
+              ids = [str(r['id']) for r in records if r.get('type') == 'A' and r.get('name') in ['@', '', 'xoxobakery.com']]
+              print('\n'.join(ids))
+          except Exception as e:
+              print(f'parse error: {e}', file=sys.stderr)
+          " 2>&1)
+
+          for id in $OLD_A_IDS; do
+            echo "Deleting old A record: $id"
+            curl -s -X DELETE "https://api.hostinger.com/v1/dns/zone/$DOMAIN/records/$id" \
+              -H "Authorization: Bearer $HOSTINGER_TOKEN"
+          done
+
+          # Delete old CNAME for www
+          OLD_CNAME_IDS=$(echo "$RECORDS" | python3 -c "
+          import sys, json
+          try:
+              records = json.load(sys.stdin)
+              ids = [str(r['id']) for r in records if r.get('type') == 'CNAME' and r.get('name') == 'www']
+              print('\n'.join(ids))
+          except Exception as e:
+              print(f'parse error: {e}', file=sys.stderr)
+          " 2>&1)
+
+          for id in $OLD_CNAME_IDS; do
+            echo "Deleting old CNAME record: $id"
+            curl -s -X DELETE "https://api.hostinger.com/v1/dns/zone/$DOMAIN/records/$id" \
+              -H "Authorization: Bearer $HOSTINGER_TOKEN"
+          done
+
+          # Add A record → Vercel
+          echo "Adding A record..."
+          curl -s -X POST "https://api.hostinger.com/v1/dns/zone/$DOMAIN/records" \
+            -H "Authorization: Bearer $HOSTINGER_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"type":"A","name":"@","content":"76.76.21.21","ttl":300}' | python3 -m json.tool || true
+
+          # Add CNAME for www
+          echo "Adding CNAME for www..."
+          curl -s -X POST "https://api.hostinger.com/v1/dns/zone/$DOMAIN/records" \
+            -H "Authorization: Bearer $HOSTINGER_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"type":"CNAME","name":"www","content":"cname.vercel-dns.com","ttl":300}' | python3 -m json.tool || true
+
+          echo "Done! xoxobakery.com will be live within minutes (DNS may take up to 24h to propagate)"
