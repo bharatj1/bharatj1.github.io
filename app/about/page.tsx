@@ -43,16 +43,16 @@ export default function AboutPage() {
               </h2>
               <div className="space-y-5 text-cocoa-400 leading-relaxed">
                 <p>
-                  It started in a small kitchen in Bandra with a hand-me-down stand mixer and an obsession with getting buttercream <em>exactly</em> right. Virali Shah had just quit her corporate job, armed with a culinary certificate from Le Cordon Bleu and a stubborn belief that Mumbai deserved better cakes.
+                  XOXO is the culmination of a lifelong love affair with the art of pâtisserie, a disciplined craft nurtured in solitude for decades. During the unexpected stillness of recent years, this ritual intensified; creating intricate, emotionally infused desserts for loved ones became a meditative focus.
                 </p>
                 <p>
-                  Six years, two thousand cakes, and one viral wedding cake later — XOXO Bakery has become synonymous with the kind of cakes that make people stop mid-conversation to ask, <em>"Where is that from?"</em>
+                  It was a close confidante, recognizing the profound dedication in a simple truffle, who inspired the transition from personal passion to business — a desire to share this specific language of refined pleasure and care with the world.
                 </p>
                 <p>
                   Every cake that leaves our studio is treated as a once-in-a-lifetime creation. Because for someone, it is. A 70th birthday. A first anniversary. A proposal. We carry that weight with joy.
                 </p>
                 <p className="font-medium text-cocoa-900">
-                  "I don't make cakes. I make memories that happen to taste extraordinary."
+                  "We don't just bake — we craft memories. Your support keeps the ovens warm and the whiskey spinning."
                 </p>
                 <p className="text-sm italic text-cocoa-300">— Virali Shah, Founder</p>
               </div>
@@ -165,7 +165,7 @@ export default function AboutPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href="https://wa.me/919876543210?text=Hi%20Virali!%20I'd%20love%20to%20discuss%20a%20cake%20for%20my%20special%20occasion."
+              href="https://wa.me/918779189819?text=Hi%20Virali!%20I'd%20love%20to%20discuss%20a%20cake%20for%20my%20special%20occasion."
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary bg-cream-50 text-cocoa-900 hover:bg-caramel-DEFAULT hover:text-cream-50"

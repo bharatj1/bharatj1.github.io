@@ -30,7 +30,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="https://wa.me/919876543210"
+                href="https://wa.me/918779189819"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full border border-cream-50/20 flex items-center justify-center text-cream-50/60 hover:text-cream-50 hover:border-cream-50/60 transition-all duration-200"
@@ -73,13 +73,13 @@ export default function Footer() {
                 <span>Mumbai, Maharashtra, India</span>
               </li>
               <li>
-                <a href="https://wa.me/919876543210" className="hover:text-cream-50 transition-colors">
+                <a href="https://wa.me/918779189819" className="hover:text-cream-50 transition-colors">
                   +91 98765 43210
                 </a>
               </li>
               <li>
-                <a href="mailto:hello@xoxobakery.in" className="hover:text-cream-50 transition-colors">
-                  hello@xoxobakery.in
+                <a href="mailto:hello@xoxobakery.com" className="hover:text-cream-50 transition-colors">
+                  hello@xoxobakery.com
                 </a>
               </li>
             </ul>

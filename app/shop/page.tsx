@@ -130,7 +130,7 @@ export default function ShopPage() {
               Our custom cake service means any design, any flavor, any occasion. Just tell us your vision.
             </p>
             <a
-              href="https://wa.me/919876543210?text=Hi%20XOXO%20Bakery!%20I'd%20like%20to%20discuss%20a%20custom%20cake."
+              href="https://wa.me/918779189819?text=Hi%20XOXO%20Bakery!%20I'd%20like%20to%20discuss%20a%20custom%20cake."
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary inline-flex"

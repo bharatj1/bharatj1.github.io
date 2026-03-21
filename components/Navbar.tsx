@@ -61,7 +61,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             {/* WhatsApp CTA */}
             <a
-              href="https://wa.me/919876543210?text=Hi%20XOXO%20Bakery!%20I'd%20love%20to%20order%20a%20cake."
+              href="https://wa.me/918779189819?text=Hi%20XOXO%20Bakery!%20I'd%20love%20to%20order%20a%20cake."
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:flex items-center gap-2 text-xs font-medium text-sage tracking-widest uppercase hover:text-cocoa-900 transition-colors duration-200"
@@ -117,7 +117,7 @@ export default function Navbar() {
               </Link>
             ))}
             <a
-              href="https://wa.me/919876543210?text=Hi%20XOXO%20Bakery!"
+              href="https://wa.me/918779189819?text=Hi%20XOXO%20Bakery!"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary text-center mt-2"
@@ -142,7 +142,7 @@ function CartSidebar() {
       `• ${item.name} (${item.size}, ${item.flavor}) x${item.quantity} — ₹${(item.price * item.quantity).toLocaleString('en-IN')}`
     ).join('\n')
     const message = `Hi XOXO Bakery! I'd like to place an order:\n\n${items}\n\nTotal: ₹${cartTotal.toLocaleString('en-IN')}\n\nPlease confirm availability.`
-    return `https://wa.me/919876543210?text=${encodeURIComponent(message)}`
+    return `https://wa.me/918779189819?text=${encodeURIComponent(message)}`
   }
 
   return (

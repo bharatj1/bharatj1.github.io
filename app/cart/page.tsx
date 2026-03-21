@@ -13,7 +13,7 @@ export default function CartPage() {
       `• ${item.name} (${item.size}, ${item.flavor}) x${item.quantity} — ₹${(item.price * item.quantity).toLocaleString('en-IN')}${item.customMessage ? `\n  Message: "${item.customMessage}"` : ''}`
     ).join('\n')
     const message = `Hi XOXO Bakery! I'd like to place an order:\n\n${itemList}\n\n*Total: ₹${cartTotal.toLocaleString('en-IN')}*\n\nPlease confirm availability and delivery details.`
-    return `https://wa.me/919876543210?text=${encodeURIComponent(message)}`
+    return `https://wa.me/918779189819?text=${encodeURIComponent(message)}`
   }
 
   return (

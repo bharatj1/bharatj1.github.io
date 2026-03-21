@@ -54,7 +54,7 @@ export default function ContactPage() {
 
               {/* WhatsApp */}
               <a
-                href="https://wa.me/919876543210?text=Hi%20XOXO%20Bakery!%20I'd%20like%20to%20discuss%20an%20order."
+                href="https://wa.me/918779189819?text=Hi%20XOXO%20Bakery!%20I'd%20like%20to%20discuss%20an%20order."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-start gap-4 p-5 bg-[#25D366]/10 border border-[#25D366]/20 rounded-2xl hover:bg-[#25D366]/15 transition-colors duration-200 mb-4 group"
@@ -85,14 +85,14 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-cocoa-900">Instagram</p>
-                  <p className="text-sm text-cocoa-300 mt-0.5">@xoxobakery</p>
+                  <p className="text-sm text-cocoa-300 mt-0.5">@xoxobakery.vs /p>
                   <p className="text-xs text-cocoa-200 mt-1">See our latest creations</p>
                 </div>
               </a>
 
               {/* Email */}
               <a
-                href="mailto:hello@xoxobakery.in"
+                href="mailto:hello@xoxobakery.com"
                 className="flex items-start gap-4 p-5 bg-cream-100 border border-cream-300 rounded-2xl hover:border-cocoa-200 transition-colors duration-200 mb-8 group"
               >
                 <div className="w-10 h-10 bg-caramel-DEFAULT/20 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -102,7 +102,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <p className="font-semibold text-cocoa-900">Email</p>
-                  <p className="text-sm text-cocoa-300 mt-0.5">hello@xoxobakery.in</p>
+                  <p className="text-sm text-cocoa-300 mt-0.5">hello@xoxobakery.com</p>
                   <p className="text-xs text-cocoa-200 mt-1">For detailed inquiries</p>
                 </div>
               </a>
@@ -141,7 +141,7 @@ export default function ContactPage() {
                     Thank you for reaching out. We'll get back to you within a few hours. Or reach us directly on WhatsApp for a faster response.
                   </p>
                   <a
-                    href={`https://wa.me/919876543210?text=${encodeURIComponent(whatsappMessage)}`}
+                    href={`https://wa.me/918779189819?text=${encodeURIComponent(whatsappMessage)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn-primary"
@@ -231,7 +231,7 @@ export default function ContactPage() {
                         Send Message
                       </button>
                       <a
-                        href={`https://wa.me/919876543210?text=${encodeURIComponent(whatsappMessage)}`}
+                        href={`https://wa.me/918779189819?text=${encodeURIComponent(whatsappMessage)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn-outline flex items-center gap-2 justify-center"

@@ -46,7 +46,7 @@ export default function HomePage() {
               Explore Our Cakes
             </Link>
             <a
-              href="https://wa.me/919876543210?text=Hi%20XOXO%20Bakery!%20I'd%20like%20to%20discuss%20a%20custom%20cake."
+              href="https://wa.me/918779189819?text=Hi%20XOXO%20Bakery!%20I'd%20like%20to%20discuss%20a%20custom%20cake."
               target="_blank"
               rel="noopener noreferrer"
               className="btn-outline border-cream-50/50 text-cream-50 hover:bg-cream-50 hover:text-cocoa-900"
@@ -205,7 +205,7 @@ export default function HomePage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <a
-                  href="https://wa.me/919876543210?text=Hi%20Virali!%20I'd%20love%20to%20discuss%20a%20custom%20cake%20for%20my%20event."
+                  href="https://wa.me/918779189819?text=Hi%20Virali!%20I'd%20love%20to%20discuss%20a%20custom%20cake%20for%20my%20event."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-primary"
@@ -361,7 +361,7 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href="https://wa.me/919876543210?text=Hi%20XOXO%20Bakery!%20I'd%20like%20to%20place%20an%20order."
+              href="https://wa.me/918779189819?text=Hi%20XOXO%20Bakery!%20I'd%20like%20to%20place%20an%20order."
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary flex items-center gap-2"

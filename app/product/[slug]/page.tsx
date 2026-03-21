@@ -259,7 +259,7 @@ export default function ProductPage({ params }: Props) {
                   )}
                 </button>
                 <a
-                  href={`https://wa.me/919876543210?text=${encodeURIComponent(whatsappMessage)}`}
+                  href={`https://wa.me/918779189819?text=${encodeURIComponent(whatsappMessage)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn-outline flex items-center gap-2 justify-center"

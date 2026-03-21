@@ -31,7 +31,7 @@ export default function CheckoutPage() {
 
     const message = `Hi XOXO Bakery! I'd like to confirm my order:\n\n*ORDER DETAILS*\n${itemList}\n\n*Subtotal: ₹${cartTotal.toLocaleString('en-IN')}*\n\n*DELIVERY INFO*\nType: ${form.deliveryType === 'pickup' ? 'Pickup' : 'Home Delivery'}\nDate: ${form.deliveryDate || 'TBD'}\nTime: ${form.deliveryTime || 'TBD'}\n${form.deliveryType === 'delivery' ? `Address: ${form.address}, ${form.city}` : ''}\n\n*CONTACT*\nName: ${form.name}\nPhone: ${form.phone}\nEmail: ${form.email}\n\n${form.notes ? `Notes: ${form.notes}` : ''}\n\nPlease confirm and share payment details. Thank you!`
 
-    return `https://wa.me/919876543210?text=${encodeURIComponent(message)}`
+    return `https://wa.me/918779189819?text=${encodeURIComponent(message)}`
   }
 
   const isValid = form.name && form.phone && form.deliveryDate
