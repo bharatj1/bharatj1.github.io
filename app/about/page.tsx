@@ -14,7 +14,7 @@ export default function AboutPage() {
         <div className="absolute inset-0 z-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="https://images.unsplash.com/photo-1607478900766-efe13248b125?w=1600&q=80"
+            src="https://drive.google.com/uc?export=view&id=1eEKzI4oHl6_jMml5ogETCQxqjhVJDqd1"
             alt="Virali Shah baking"
             className="w-full h-full object-cover"
           />
@@ -62,7 +62,7 @@ export default function AboutPage() {
               <div className="rounded-3xl overflow-hidden shadow-2xl shadow-cocoa-900/20 aspect-[3/4]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80"
+                  src="https://drive.google.com/uc?export=view&id=1ElhnS0mpfTD3JLBveqxGbj47k7i1vfFU"
                   alt="Virali Shah in the bakery"
                   className="w-full h-full object-cover"
                 />
@@ -76,6 +76,16 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* Third photo banner */}
+      <div className="w-full h-64 md:h-80 overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://drive.google.com/uc?export=view&id=1UmFs90E5LQ88wvdfEzdNb7AikslyYRjJ"
+          alt="XOXO Bakery"
+          className="w-full h-full object-cover object-center"
+        />
+      </div>
 
       {/* Values */}
       <section className="section-padding bg-cream-100">
