@@ -22,7 +22,11 @@ import argparse
 import subprocess
 import sys
 import time
-import readline
+try:
+    import readline
+    HAS_READLINE = True
+except ImportError:
+    HAS_READLINE = False  # Windows — tab completion not available
 
 try:
     from ppadb.client import Client as AdbClient
@@ -559,8 +563,9 @@ def _tab_complete(text, state):
     return options[state] if state < len(options) else None
 
 def repl(tv: AndroidTV):
-    readline.set_completer(_tab_complete)
-    readline.parse_and_bind("tab: complete")
+    if HAS_READLINE:
+        readline.set_completer(_tab_complete)
+        readline.parse_and_bind("tab: complete")
     print(HELP_TEXT)
 
     while True:
