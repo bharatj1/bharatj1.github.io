@@ -294,8 +294,14 @@ class AndroidTV:
         ok("Restored Google Backdrop screensaver")
 
     def start_screensaver_now(self):
-        self.sh("am start -n com.android.systemui/.Somnambulator", silent=True)
-        ok("Screensaver started")
+        # Get current screensaver component and start it directly
+        component = self.sh("settings get secure screensaver_components").strip()
+        if component and component != "null":
+            self.sh(f"am start -n {component}", silent=True)
+            ok(f"Screensaver started: {component}")
+        else:
+            self.sh("am start -n com.android.systemui/.Somnambulator", silent=True)
+            ok("Screensaver started")
 
     # ── Projectivy volume fix ─────────────────────────────────────────────
 
