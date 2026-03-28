@@ -70,10 +70,11 @@ def search_emails(from_name=None, subject_contains=None, days_back=7, folder_nam
         # Priority order: LINEDATA first, then Inbox, then others, skip GraitITSupport
         def folder_priority(f):
             name = f.Name.lower()
-            if "linedata" in name:       return 0
-            if name == "inbox":          return 1
+            if name == "inbox":          return 0
+            if "linedata" in name:       return 1
             if "sent" in name:           return 2
             if "graititsupport" in name: return 99  # skip unless asked
+            if "alert" in name:          return 99  # skip unless asked
             return 3
         all_folders = [f for f in all_folders if folder_priority(f) < 99]
         all_folders.sort(key=folder_priority)
