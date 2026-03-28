@@ -113,23 +113,21 @@ class Handler(BaseHTTPRequestHandler):
             body   = json.loads(self.rfile.read(length))
             question   = body.get("q", "").strip()
             session_id = body.get("session_id", "default")
+            files      = body.get("files", [])  # [{name, mime, data (base64)}]
 
-            if not question:
-                self._json(400, {"ok": False, "msg": "Empty question"})
+            if not question and not files:
+                self._json(400, {"ok": False, "msg": "Empty message"})
                 return
 
             if session_id not in SESSIONS:
-                # Try to restore from saved chats
                 saved = next((c for c in load_chats() if c["id"] == session_id), None)
                 SESSIONS[session_id] = saved["messages"] if saved else []
 
             try:
-                answer, updated_history = agent.run(question, SESSIONS[session_id])
+                answer, updated_history = agent.run(question, SESSIONS[session_id], files)
                 SESSIONS[session_id] = updated_history
-                # Persist chat
                 upsert_chat(session_id, updated_history)
                 self._json(200, {"ok": True, "answer": answer})
-                # Extract memory in background
                 threading.Thread(
                     target=mem.extract_and_save,
                     args=(updated_history, agent.CFG["anthropic_api_key"]),

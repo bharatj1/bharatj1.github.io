@@ -202,17 +202,76 @@ def build_system():
     return SYSTEM + memory_block
 
 
-def run(user_message, history=None):
+def build_user_content(text, files):
     """
-    Run the agent with conversation memory.
+    Build Claude message content with text + optional files.
+    Images → native vision. PDFs → native document. Others → extract text.
+    """
+    import base64
+    from tools.files import extract
+
+    content = []
+
+    # Process attached files first
+    for f in files:
+        mime = f.get("mime", "")
+        name = f.get("name", "file")
+        data_b64 = f.get("data", "")
+        data_bytes = base64.b64decode(data_b64)
+
+        if mime.startswith("image/"):
+            # Native vision
+            content.append({
+                "type": "image",
+                "source": {"type": "base64", "media_type": mime, "data": data_b64}
+            })
+            content.append({"type": "text", "text": f"[Attached image: {name}]"})
+
+        elif mime == "application/pdf":
+            # Try native PDF first, fall back to text extraction
+            content.append({
+                "type": "document",
+                "source": {"type": "base64", "media_type": "application/pdf", "data": data_b64}
+            })
+            content.append({"type": "text", "text": f"[Attached PDF: {name}]"})
+
+        else:
+            # Extract text from Word/Excel/PPT/etc
+            extracted = extract(name, data_bytes)
+            if extracted:
+                content.append({
+                    "type": "text",
+                    "text": f"[Attached file: {name}]\n\n{extracted}"
+                })
+
+    # Add the user's text message
+    if text:
+        content.append({"type": "text", "text": text})
+    elif not content:
+        content.append({"type": "text", "text": "(no message)"})
+
+    # If only one text item, return as plain string (simpler for history)
+    if len(content) == 1 and content[0]["type"] == "text" and not files:
+        return content[0]["text"]
+
+    return content
+
+
+def run(user_message, history=None, files=None):
+    """
+    Run the agent with conversation memory and optional file attachments.
     history: list of previous messages [{"role": ..., "content": ...}]
+    files:   list of {name, mime, data (base64)}
     Returns (answer, updated_history)
     """
     if history is None:
         history = []
+    if files is None:
+        files = []
 
-    audit("user_query", user_message[:100])
-    messages = history + [{"role": "user", "content": user_message}]
+    audit("user_query", f"{user_message[:80]} [{len(files)} files]")
+    user_content = build_user_content(user_message, files)
+    messages = history + [{"role": "user", "content": user_content}]
 
     while True:
         response = client.messages.create(
@@ -235,9 +294,19 @@ def run(user_message, history=None):
         if not tool_calls:
             final = " ".join(text_parts).strip()
             audit("agent_response", final[:100])
-            # Save to history (keep last 20 exchanges to avoid token bloat)
             messages.append({"role": "assistant", "content": final})
-            trimmed = messages[-40:] if len(messages) > 40 else messages
+            # Keep last 40 messages, but strip binary image/doc data from history
+            def clean_msg(m):
+                if not isinstance(m.get("content"), list):
+                    return m
+                cleaned = []
+                for block in m["content"]:
+                    if block.get("type") in ("image", "document"):
+                        cleaned.append({"type": "text", "text": f"[{block['type']} attachment]"})
+                    else:
+                        cleaned.append(block)
+                return {**m, "content": cleaned}
+            trimmed = [clean_msg(m) for m in messages[-40:]]
             return final, trimmed
 
         messages.append({"role": "assistant", "content": response.content})

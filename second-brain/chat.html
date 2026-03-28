@@ -223,10 +223,13 @@
     padding: 10px 12px;
     border-top: 1px solid #161616;
     display: flex;
+    flex-direction: column;
     gap: 8px;
     flex-shrink: 0;
     background: #0a0a0a;
   }
+
+  .footer-row { display: flex; gap: 8px; align-items: flex-end; }
 
   textarea {
     flex: 1;
@@ -258,6 +261,75 @@
   }
   button.send:active { background: #1d4ed8; transform: scale(0.93); }
   button.send:disabled { background: #161616; color: #252525; }
+
+  button.attach {
+    background: none;
+    border: 1px solid #252525;
+    border-radius: 14px;
+    color: #555;
+    font-size: 18px;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  button.attach:active { color: #aaa; border-color: #444; }
+
+  /* Attachment previews */
+  #attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 2px;
+  }
+  #attachments:empty { display: none; }
+
+  .att-chip {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 160px;
+  }
+  .att-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .att-chip .rm {
+    color: #444;
+    cursor: pointer;
+    font-size: 14px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .att-chip .rm:active { color: #ef4444; }
+
+  .att-img-preview {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #2a2a2a;
+    cursor: pointer;
+    position: relative;
+  }
+  .att-img-wrap { position: relative; display: inline-block; }
+  .att-img-wrap .rm {
+    position: absolute;
+    top: -6px; right: -6px;
+    background: #333;
+    border-radius: 50%;
+    width: 18px; height: 18px;
+    font-size: 11px;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    line-height: 1;
+  }
 </style>
 </head>
 <body>
@@ -290,10 +362,18 @@
   </div>
 
   <footer>
-    <textarea id="inp" placeholder="Ask anything..." rows="1"
-      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"
-      oninput="autosize(this)"></textarea>
-    <button class="send" id="btn" onclick="send()">↑</button>
+    <div id="attachments"></div>
+    <div class="footer-row">
+      <button class="attach" onclick="document.getElementById('file-input').click()" title="Attach file">📎</button>
+      <input id="file-input" type="file" style="display:none" multiple
+        accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.md,image/*"
+        onchange="handleFiles(this.files)">
+      <textarea id="inp" placeholder="Ask anything… or paste a screenshot" rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"
+        oninput="autosize(this)"
+        onpaste="handlePaste(event)"></textarea>
+      <button class="send" id="btn" onclick="send()">↑</button>
+    </div>
   </footer>
 </div>
 
@@ -426,30 +506,41 @@
 
   async function send() {
     if (busy) return;
-    const inp = document.getElementById('inp');
-    const q   = inp.value.trim();
-    if (!q) return;
+    const inp   = document.getElementById('inp');
+    const q     = inp.value.trim();
+    const files = [...pendingFiles];
+
+    if (!q && !files.length) return;
 
     inp.value = '';
     inp.style.height = '44px';
+    pendingFiles = [];
+    renderAttachments();
 
-    // Update title from first message
     if (!activeChatId) {
-      const short = q.length > 50 ? q.slice(0, 50) + '...' : q;
-      document.getElementById('chat-title').textContent = short;
+      const short = (q || files[0]?.name || 'Attachment').slice(0, 50);
+      document.getElementById('chat-title').textContent = short + (short.length >= 50 ? '...' : '');
       activeChatId = sessionId;
     }
 
-    addMsg(q, 'you');
+    // Show images inline, show text bubble
+    renderAttachedInChat(files);
+    if (q) addMsg(q, 'you');
+
     busy = true;
     document.getElementById('btn').disabled = true;
     const thinking = addMsg('Checking sources...', 'thinking');
 
     try {
+      const payload = {
+        q,
+        session_id: sessionId,
+        files: files.map(f => ({ name: f.name, mime: f.mime, data: f.data }))
+      };
       const res = await fetch('/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ q, session_id: sessionId }),
+        body: JSON.stringify(payload),
         signal: AbortSignal.timeout(120000),
       });
       const data = await res.json();
@@ -463,6 +554,83 @@
     busy = false;
     document.getElementById('btn').disabled = false;
     inp.focus();
+  }
+
+  // ── File attachments ───────────────────────────────────────────────────────
+  let pendingFiles = []; // [{name, mime, data (base64), preview}]
+
+  function handlePaste(e) {
+    const items = e.clipboardData?.items || [];
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) addFile(file);
+        return;
+      }
+    }
+  }
+
+  function handleFiles(fileList) {
+    Array.from(fileList).forEach(addFile);
+    document.getElementById('file-input').value = '';
+  }
+
+  function addFile(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl  = e.target.result;
+      const b64      = dataUrl.split(',')[1];
+      const isImage  = file.type.startsWith('image/');
+      const id       = Date.now() + Math.random();
+
+      pendingFiles.push({ id, name: file.name, mime: file.type, data: b64, isImage });
+      renderAttachments();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function removeFile(id) {
+    pendingFiles = pendingFiles.filter(f => f.id !== id);
+    renderAttachments();
+  }
+
+  function renderAttachments() {
+    const el = document.getElementById('attachments');
+    el.innerHTML = '';
+    pendingFiles.forEach(f => {
+      if (f.isImage) {
+        const wrap = document.createElement('div');
+        wrap.className = 'att-img-wrap';
+        wrap.innerHTML = `
+          <img class="att-img-preview" src="data:${f.mime};base64,${f.data}">
+          <div class="rm" onclick="removeFile(${f.id})">✕</div>
+        `;
+        el.appendChild(wrap);
+      } else {
+        const chip = document.createElement('div');
+        chip.className = 'att-chip';
+        const icon = f.mime.includes('pdf') ? '📄' :
+                     f.mime.includes('word') || f.name.endsWith('.docx') ? '📝' :
+                     f.mime.includes('sheet') || f.name.endsWith('.xlsx') ? '📊' :
+                     f.mime.includes('presentation') || f.name.endsWith('.pptx') ? '📑' : '📎';
+        chip.innerHTML = `<span>${icon} ${esc(f.name)}</span><span class="rm" onclick="removeFile(${f.id})">✕</span>`;
+        el.appendChild(chip);
+      }
+    });
+  }
+
+  // Show attached files inline in chat
+  function renderAttachedInChat(files) {
+    files.forEach(f => {
+      if (f.isImage) {
+        const d = document.createElement('div');
+        d.className = 'msg you';
+        d.style.padding = '6px';
+        d.innerHTML = `<img src="data:${f.mime};base64,${f.data}" style="max-width:100%;border-radius:10px;display:block">`;
+        document.getElementById('chat').appendChild(d);
+      }
+    });
   }
 
   // ── Init ───────────────────────────────────────────────────────────────────
