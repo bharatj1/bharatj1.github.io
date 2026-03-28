@@ -5,6 +5,7 @@ Read-only. Never sends, posts, or modifies anything.
 
 import json, os, datetime
 import anthropic
+import memory as mem
 
 cfg_path = os.path.join(os.path.dirname(__file__), "config.json")
 with open(cfg_path) as f:
@@ -195,6 +196,12 @@ IT governance, automation and AI workflows. Clients in financial services with h
 """
 
 
+def build_system():
+    """Build system prompt with current persistent memory injected."""
+    memory_block = mem.format_memory_for_prompt(mem.load_memory())
+    return SYSTEM + memory_block
+
+
 def run(user_message, history=None):
     """
     Run the agent with conversation memory.
@@ -211,7 +218,7 @@ def run(user_message, history=None):
         response = client.messages.create(
             model="claude-opus-4-6",
             max_tokens=4096,
-            system=SYSTEM,
+            system=build_system(),
             tools=TOOLS,
             messages=messages,
         )

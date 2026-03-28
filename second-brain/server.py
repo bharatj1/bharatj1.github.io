@@ -3,10 +3,11 @@ Second Brain HTTP server — with conversation memory per session.
 Run as regular user (not admin) for Outlook access.
 Port 8081.
 """
-import json, os, socket, uuid
+import json, os, socket, uuid, threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse
 import agent
+import memory as mem
 
 # Session store: session_id -> list of messages
 SESSIONS = {}
@@ -22,6 +23,13 @@ class Handler(BaseHTTPRequestHandler):
             self._respond(200, "text/html", html)
         elif path == "/new_session":
             sid = str(uuid.uuid4())
+            # Save memory from previous default session if it exists
+            if "default" in SESSIONS and SESSIONS["default"]:
+                threading.Thread(
+                    target=mem.extract_and_save,
+                    args=(SESSIONS["default"], agent.CFG["anthropic_api_key"]),
+                    daemon=True
+                ).start()
             SESSIONS[sid] = []
             self._json(200, {"session_id": sid})
         else:
@@ -47,6 +55,12 @@ class Handler(BaseHTTPRequestHandler):
                 answer, updated_history = agent.run(question, SESSIONS[session_id])
                 SESSIONS[session_id] = updated_history
                 self._json(200, {"ok": True, "answer": answer})
+                # Extract memory in background after every exchange
+                threading.Thread(
+                    target=mem.extract_and_save,
+                    args=(updated_history, agent.CFG["anthropic_api_key"]),
+                    daemon=True
+                ).start()
             except Exception as e:
                 self._json(500, {"ok": False, "msg": str(e)})
         else:
