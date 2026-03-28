@@ -22,10 +22,10 @@ def audit(action, detail=""):
 
 # ── Tool implementations ───────────────────────────────────────────────────────
 
-def tool_search_emails(from_name=None, subject_contains=None, days_back=7):
-    audit("search_emails", f"from={from_name} subject={subject_contains} days={days_back}")
+def tool_search_emails(from_name=None, subject_contains=None, days_back=7, folder_name=None):
+    audit("search_emails", f"from={from_name} subject={subject_contains} days={days_back} folder={folder_name}")
     from tools.outlook import search_emails
-    return search_emails(from_name=from_name, subject_contains=subject_contains, days_back=days_back)
+    return search_emails(from_name=from_name, subject_contains=subject_contains, days_back=days_back, folder_name=folder_name)
 
 def tool_get_email_thread(conversation_id):
     audit("get_email_thread", f"conv={str(conversation_id)[:20]}")
@@ -69,13 +69,14 @@ TOOL_MAP = {
 TOOLS = [
     {
         "name": "search_emails",
-        "description": "Search Outlook inbox. Use when user mentions a person, topic, or wants recent emails.",
+        "description": "Search ALL Outlook folders — Inbox, LINEDATA, GraitITSupport, Sent, etc. Use when user mentions a person, topic, folder, or wants recent emails.",
         "input_schema": {
             "type": "object",
             "properties": {
                 "from_name":        {"type": "string",  "description": "Sender name or email (partial ok)"},
                 "subject_contains": {"type": "string",  "description": "Keyword in subject line"},
                 "days_back":        {"type": "integer", "description": "Days back to search (default 7)"},
+                "folder_name":      {"type": "string",  "description": "Limit to specific folder e.g. 'LINEDATA' or 'GraitITSupport' (optional)"},
             },
         },
     },
