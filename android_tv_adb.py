@@ -118,6 +118,7 @@ class AndroidTV:
                 if d.serial == target:
                     self.device = d
                     ok(f"Connected  →  {d.serial}")
+                    self._restore_accessibility()
                     return True
             err("Device not found. Check:")
             print("     1. TV and laptop are on the same WiFi")
@@ -134,6 +135,17 @@ class AndroidTV:
         except Exception:
             pass
         info("Disconnected.")
+
+    def _restore_accessibility(self):
+        """Auto re-enable tvQuickActions accessibility on every connect (TCL resets it on reboot)."""
+        svc = "dev.vodik7.tvquickactions/.KeyAccessibilityService"
+        current = self.device.shell("settings get secure enabled_accessibility_services").strip()
+        if svc not in current:
+            self.device.shell(f"settings put secure enabled_accessibility_services {svc}")
+            self.device.shell("settings put secure accessibility_enabled 1")
+            ok("tvQuickActions accessibility restored")
+        else:
+            ok("tvQuickActions accessibility already active")
 
     @staticmethod
     def _start_adb_server():
