@@ -49,20 +49,34 @@ def list_folders():
 
 def search_emails(from_name=None, subject_contains=None, days_back=7, folder_name=None):
     """
-    Search across ALL folders (or a specific one).
-    from_name: partial sender name or email
-    subject_contains: keyword in subject
-    days_back: how many days back (default 7)
-    folder_name: limit to a specific folder e.g. 'LINEDATA', 'GraitITSupport'
+    Search emails across folders in priority order:
+      1. LINEDATA  — manually filed work emails, highest signal
+      2. Inbox     — fresh unread emails
+      3. Sent      — outgoing mail
+      4. Others    — everything else except GraitITSupport
+      GraitITSupport is skipped by default (automated rules, low signal).
+
+    folder_name: override to search a specific folder e.g. 'GraitITSupport'
     """
     ns = _get_ns()
     cutoff = datetime.now() - timedelta(days=days_back)
     all_folders = _get_all_folders(ns)
 
-    # Filter to specific folder if requested
     if folder_name:
+        # Explicit folder requested — use it directly
         all_folders = [f for f in all_folders
                        if folder_name.lower() in f.Name.lower()]
+    else:
+        # Priority order: LINEDATA first, then Inbox, then others, skip GraitITSupport
+        def folder_priority(f):
+            name = f.Name.lower()
+            if "linedata" in name:       return 0
+            if name == "inbox":          return 1
+            if "sent" in name:           return 2
+            if "graititsupport" in name: return 99  # skip unless asked
+            return 3
+        all_folders = [f for f in all_folders if folder_priority(f) < 99]
+        all_folders.sort(key=folder_priority)
 
     results = []
 
