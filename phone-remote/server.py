@@ -1,0 +1,172 @@
+"""
+Phone Remote Control Server for Windows
+Run this on your Windows laptop. It starts an HTTP server on port 8080.
+Bookmark http://<your-ip>:8080 on your phone.
+"""
+
+import subprocess
+import os
+import json
+import socket
+import time
+import urllib.request
+import urllib.parse
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse
+
+PORT = 8080
+
+
+def run_ps(command):
+    result = subprocess.run(
+        ["powershell", "-NoProfile", "-NonInteractive", "-Command", command],
+        capture_output=True, text=True
+    )
+    return result.returncode == 0, result.stdout.strip() or result.stderr.strip()
+
+
+def mute_toggle():
+    ok, _ = run_ps("(New-Object -ComObject WScript.Shell).SendKeys([char]173)")
+    return ok, "Muted / Unmuted"
+
+
+def sleep_pc():
+    ok, _ = run_ps("Add-Type -Assembly System.Windows.Forms; [System.Windows.Forms.Application]::SetSuspendState('Suspend', $false, $false)")
+    return ok, "Going to sleep"
+
+
+def reboot_pc():
+    subprocess.Popen(["powershell", "-Command", "Start-Sleep 2; Restart-Computer -Force"])
+    return True, "Rebooting in 2s"
+
+
+# ─── Teams ────────────────────────────────────────────────────────────────────
+
+TOKEN_FILE = os.path.join(os.path.dirname(__file__), "teams_token.json")
+
+TEAMS_PRESENCE = {
+    "Available":    ("Available",    "Available"),
+    "Away":         ("Away",         "Away"),
+    "Busy":         ("Busy",         "InACall"),
+    "DoNotDisturb": ("DoNotDisturb", "DoNotDisturb"),
+}
+
+
+def get_teams_token():
+    if not os.path.exists(TOKEN_FILE):
+        return None, "Teams not set up — run setup_teams.py first"
+    with open(TOKEN_FILE) as f:
+        data = json.load(f)
+
+    if time.time() < data.get("expires_at", 0) - 60:
+        return data["access_token"], None
+
+    body = urllib.parse.urlencode({
+        "client_id":     data["client_id"],
+        "grant_type":    "refresh_token",
+        "refresh_token": data["refresh_token"],
+        "scope":         "Presence.ReadWrite offline_access",
+    }).encode()
+    try:
+        req = urllib.request.Request(
+            f"https://login.microsoftonline.com/{data['tenant_id']}/oauth2/v2.0/token",
+            data=body
+        )
+        with urllib.request.urlopen(req, timeout=8) as r:
+            token = json.loads(r.read())
+        data["access_token"]  = token["access_token"]
+        data["refresh_token"] = token.get("refresh_token", data["refresh_token"])
+        data["expires_at"]    = time.time() + token["expires_in"]
+        with open(TOKEN_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+        return data["access_token"], None
+    except Exception as e:
+        return None, f"Token refresh failed: {e}"
+
+
+def set_teams_status(availability):
+    token, err = get_teams_token()
+    if not token:
+        return False, err
+
+    av, activity = TEAMS_PRESENCE[availability]
+    body = json.dumps({
+        "sessionId":          "phone-remote",
+        "availability":       av,
+        "activity":           activity,
+        "expirationDuration": "PT1H",
+    }).encode()
+    req = urllib.request.Request(
+        "https://graph.microsoft.com/v1.0/me/presence/setPresence",
+        data=body, method="POST",
+        headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=8):
+            return True, f"Teams → {availability}"
+    except urllib.error.HTTPError as e:
+        return False, f"Graph {e.code}: {e.read().decode()[:80]}"
+    except Exception as e:
+        return False, str(e)
+
+
+# ─── HTTP Server ───────────────────────────────────────────────────────────────
+
+ACTIONS = {
+    "/mute":             mute_toggle,
+    "/sleep":            sleep_pc,
+    "/reboot":           reboot_pc,
+    "/teams/available":  lambda: set_teams_status("Available"),
+    "/teams/away":       lambda: set_teams_status("Away"),
+    "/teams/busy":       lambda: set_teams_status("Busy"),
+    "/teams/dnd":        lambda: set_teams_status("DoNotDisturb"),
+}
+
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass
+
+    def send_json(self, status, data):
+        body = json.dumps(data).encode()
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", len(body))
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        path = urlparse(self.path).path
+
+        if path in ("/", "/index.html"):
+            html = open(os.path.join(os.path.dirname(__file__), "index.html"), "rb").read()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html")
+            self.send_header("Content-Length", len(html))
+            self.end_headers()
+            self.wfile.write(html)
+            return
+
+        if path in ACTIONS:
+            try:
+                ok, msg = ACTIONS[path]()
+                self.send_json(200 if ok else 500, {"ok": ok, "msg": msg})
+            except Exception as e:
+                self.send_json(500, {"ok": False, "msg": str(e)})
+            return
+
+        self.send_json(404, {"ok": False, "msg": "Not found"})
+
+
+if __name__ == "__main__":
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    finally:
+        s.close()
+
+    print(f"\n  PC Remote running at  http://{ip}:{PORT}")
+    print(f"  Open this on your phone ^\n")
+    HTTPServer(("0.0.0.0", PORT), Handler).serve_forever()

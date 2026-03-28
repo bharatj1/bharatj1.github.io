@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<title>PC Remote</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: #0a0a0a;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100dvh;
+    padding: 20px 16px 40px;
+  }
+
+  h1 {
+    font-size: 12px;
+    color: #444;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    max-width: 380px;
+    margin: 0 auto;
+  }
+
+  .tile {
+    background: #1c1c1c;
+    border-radius: 20px;
+    padding: 28px 16px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: background 0.1s, transform 0.08s;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .tile:active { transform: scale(0.94); }
+  .tile.loading { opacity: 0.5; pointer-events: none; }
+  .tile.success { border-color: #22c55e; background: #0d2218; }
+  .tile.error   { border-color: #ef4444; background: #230f0f; }
+
+  .icon  { font-size: 40px; line-height: 1; }
+  .label { font-size: 14px; font-weight: 600; color: #ddd; }
+  .status {
+    font-size: 11px;
+    color: #555;
+    text-align: center;
+    min-height: 14px;
+  }
+  .tile.success .status { color: #4ade80; }
+  .tile.error   .status { color: #f87171; }
+
+  .tile.danger { background: #1a0e0e; }
+  .tile.danger .label { color: #f87171; }
+  .tile.danger .icon  { filter: hue-rotate(0deg); }
+
+  .section-label {
+    font-size: 11px;
+    color: #3a3a3a;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 20px auto 10px;
+    max-width: 380px;
+  }
+
+  .teams-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    max-width: 380px;
+    margin: 0 auto;
+  }
+
+  .teams-grid .tile {
+    padding: 18px 6px 14px;
+    gap: 7px;
+    border-radius: 16px;
+  }
+  .teams-grid .icon  { font-size: 26px; }
+  .teams-grid .label { font-size: 11px; }
+</style>
+</head>
+<body>
+
+<h1>PC Remote</h1>
+
+<div class="grid">
+  <div class="tile" onclick="action(this, '/mute')">
+    <div class="icon">🔇</div>
+    <div class="label">Mute</div>
+    <div class="status">tap to toggle</div>
+  </div>
+
+  <div class="tile" onclick="action(this, '/sleep')">
+    <div class="icon">💤</div>
+    <div class="label">Sleep</div>
+    <div class="status">put to sleep</div>
+  </div>
+
+  <div class="tile danger" onclick="confirmAction(this, '/reboot', 'Reboot the PC?')">
+    <div class="icon">🔁</div>
+    <div class="label">Reboot</div>
+    <div class="status">tap to confirm</div>
+  </div>
+
+  <div class="tile" style="visibility:hidden"></div>
+</div>
+
+<div class="section-label">Teams Status</div>
+
+<div class="teams-grid">
+  <div class="tile" onclick="action(this, '/teams/available')">
+    <div class="icon">🟢</div>
+    <div class="label">Available</div>
+    <div class="status"></div>
+  </div>
+  <div class="tile" onclick="action(this, '/teams/away')">
+    <div class="icon">🟡</div>
+    <div class="label">Away</div>
+    <div class="status"></div>
+  </div>
+  <div class="tile" onclick="action(this, '/teams/busy')">
+    <div class="icon">🔴</div>
+    <div class="label">Busy</div>
+    <div class="status"></div>
+  </div>
+  <div class="tile" onclick="action(this, '/teams/dnd')">
+    <div class="icon">⛔</div>
+    <div class="label">DND</div>
+    <div class="status"></div>
+  </div>
+</div>
+
+<script>
+  async function action(tile, endpoint) {
+    if (tile.classList.contains('loading')) return;
+    tile.classList.remove('success', 'error');
+    tile.classList.add('loading');
+    const st = tile.querySelector('.status');
+    st.textContent = '...';
+
+    try {
+      const res = await fetch(endpoint, { signal: AbortSignal.timeout(8000) });
+      const data = await res.json();
+      tile.classList.remove('loading');
+      tile.classList.add(data.ok ? 'success' : 'error');
+      st.textContent = data.msg;
+    } catch (e) {
+      tile.classList.remove('loading');
+      tile.classList.add('error');
+      st.textContent = e.name === 'TimeoutError' ? 'timed out' : 'unreachable';
+    }
+
+    setTimeout(() => {
+      tile.classList.remove('success', 'error');
+      st.textContent = tile.dataset.def;
+    }, 3000);
+  }
+
+  function confirmAction(tile, endpoint, msg) {
+    if (confirm(msg)) action(tile, endpoint);
+  }
+
+  document.querySelectorAll('.tile').forEach(t => {
+    const s = t.querySelector('.status');
+    t.dataset.def = s ? s.textContent : '';
+  });
+</script>
+</body>
+</html>
