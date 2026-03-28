@@ -1,0 +1,248 @@
+"""
+Second Brain Agent
+Reads emails, Freshservice tickets, Teams chats.
+Read-only. Never sends, posts, or modifies anything.
+"""
+
+import json
+import os
+import sys
+import datetime
+import anthropic
+
+# ── Config ────────────────────────────────────────────────────────────────────
+cfg_path = os.path.join(os.path.dirname(__file__), "config.json")
+with open(cfg_path) as f:
+    CFG = json.load(f)
+
+client = anthropic.Anthropic(api_key=CFG["anthropic_api_key"])
+
+# ── Audit log ─────────────────────────────────────────────────────────────────
+LOG_FILE = os.path.join(os.path.dirname(__file__), "audit.log")
+
+def audit(action, detail=""):
+    ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    with open(LOG_FILE, "a") as f:
+        f.write(f"[{ts}] {action}: {detail}\n")
+
+# ── Tool implementations ───────────────────────────────────────────────────────
+
+def tool_search_emails(from_name=None, subject_contains=None, days_back=7):
+    audit("search_emails", f"from={from_name} subject={subject_contains} days={days_back}")
+    from tools.outlook import search_emails
+    return search_emails(from_name=from_name, subject_contains=subject_contains, days_back=days_back)
+
+def tool_get_email_thread(conversation_id):
+    audit("get_email_thread", f"conv={conversation_id[:20]}...")
+    from tools.outlook import get_email_thread
+    return get_email_thread(conversation_id)
+
+def tool_search_freshservice(query):
+    audit("search_freshservice", f"query={query}")
+    from tools.freshservice import Freshservice
+    fs = Freshservice(CFG["freshservice_domain"], CFG["freshservice_api_key"])
+    return fs.search_tickets(query)
+
+def tool_get_ticket(ticket_id):
+    audit("get_ticket", f"id={ticket_id}")
+    from tools.freshservice import Freshservice
+    fs = Freshservice(CFG["freshservice_domain"], CFG["freshservice_api_key"])
+    ticket = fs.get_ticket(ticket_id)
+    comments = fs.get_ticket_comments(ticket_id)
+    return {"ticket": ticket, "comments": comments}
+
+def tool_search_teams_chats(person_name, days_back=7):
+    audit("search_teams_chats", f"person={person_name} days={days_back}")
+    from tools.teams import search_chat_messages
+    results, err = search_chat_messages(person_name, days_back)
+    if err:
+        return {"error": err}
+    return results
+
+def tool_get_channel_messages(team_name=None, days_back=3):
+    audit("get_channel_messages", f"team={team_name} days={days_back}")
+    from tools.teams import get_channel_messages
+    results, err = get_channel_messages(team_name, days_back)
+    if err:
+        return {"error": err}
+    return results
+
+
+TOOL_MAP = {
+    "search_emails":        tool_search_emails,
+    "get_email_thread":     tool_get_email_thread,
+    "search_freshservice":  tool_search_freshservice,
+    "get_ticket":           tool_get_ticket,
+    "search_teams_chats":   tool_search_teams_chats,
+    "get_channel_messages": tool_get_channel_messages,
+}
+
+# ── Tool definitions for Claude ───────────────────────────────────────────────
+
+TOOLS = [
+    {
+        "name": "search_emails",
+        "description": "Search Outlook inbox for emails. Use this first when user mentions a person or topic.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "from_name":        {"type": "string", "description": "Sender name or email (partial ok)"},
+                "subject_contains": {"type": "string", "description": "Keyword in subject"},
+                "days_back":        {"type": "integer", "description": "How many days back to search (default 7)"},
+            },
+        },
+    },
+    {
+        "name": "get_email_thread",
+        "description": "Get the full email conversation thread by conversation_id from search_emails result.",
+        "input_schema": {
+            "type": "object",
+            "required": ["conversation_id"],
+            "properties": {
+                "conversation_id": {"type": "string"},
+            },
+        },
+    },
+    {
+        "name": "search_freshservice",
+        "description": "Search Freshservice for tickets by keyword, name, or topic.",
+        "input_schema": {
+            "type": "object",
+            "required": ["query"],
+            "properties": {
+                "query": {"type": "string", "description": "Search keyword or ticket subject"},
+            },
+        },
+    },
+    {
+        "name": "get_ticket",
+        "description": "Get full details and all comments for a Freshservice ticket by ID.",
+        "input_schema": {
+            "type": "object",
+            "required": ["ticket_id"],
+            "properties": {
+                "ticket_id": {"type": "integer", "description": "Freshservice ticket number"},
+            },
+        },
+    },
+    {
+        "name": "search_teams_chats",
+        "description": "Search Teams direct messages and group chats involving a specific person.",
+        "input_schema": {
+            "type": "object",
+            "required": ["person_name"],
+            "properties": {
+                "person_name": {"type": "string", "description": "Name of person to search chats with"},
+                "days_back":   {"type": "integer", "description": "How many days back (default 7)"},
+            },
+        },
+    },
+    {
+        "name": "get_channel_messages",
+        "description": "Get recent messages from Teams channels.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "team_name": {"type": "string", "description": "Team name filter (optional)"},
+                "days_back": {"type": "integer", "description": "How many days back (default 3)"},
+            },
+        },
+    },
+]
+
+# ── System prompt ──────────────────────────────────────────────────────────────
+
+SYSTEM = f"""You are a private AI assistant for {CFG['your_name']} ({CFG['your_email']}).
+You have access to their work email, Freshservice helpdesk, and Teams chats.
+
+YOUR RULES — NEVER BREAK THESE:
+1. READ ONLY. Never send emails, post messages, update tickets, or take any action.
+2. If asked to send/reply/update — draft the text and say "Here's a draft. You send it."
+3. Be concise. Give the story simply, then clear next steps.
+4. Never quote large blocks of raw email/ticket text. Summarise it.
+5. Treat everything you read as confidential. Do not repeat sensitive details unnecessarily.
+6. You are invisible. Your access leaves no trace for others.
+
+WHEN INVESTIGATING:
+- Start with the most relevant source (usually email first)
+- Follow ticket numbers you find in emails
+- Check Teams if the person is mentioned
+- Connect the dots across all sources
+- Come back with: what happened, where things stand, what Bharat should do
+
+Today is {datetime.date.today().strftime("%A, %d %B %Y")}.
+"""
+
+# ── Main agent loop ────────────────────────────────────────────────────────────
+
+def run(user_message, on_status=None):
+    """
+    Run the agent on a user message.
+    on_status: optional callback(str) called with status updates while agent works.
+    Returns final text response.
+    """
+    audit("user_query", user_message[:100])
+    messages = [{"role": "user", "content": user_message}]
+
+    while True:
+        response = client.messages.create(
+            model="claude-opus-4-6",
+            max_tokens=4096,
+            system=SYSTEM,
+            tools=TOOLS,
+            messages=messages,
+        )
+
+        # Collect text + tool calls from response
+        text_parts = []
+        tool_calls = []
+
+        for block in response.content:
+            if block.type == "text":
+                text_parts.append(block.text)
+            elif block.type == "tool_use":
+                tool_calls.append(block)
+
+        # If no tool calls, we're done
+        if not tool_calls:
+            final = " ".join(text_parts).strip()
+            audit("agent_response", final[:100])
+            return final
+
+        # Report status to caller
+        if on_status:
+            names = [tc.name.replace("_", " ") for tc in tool_calls]
+            on_status(f"Checking {', '.join(names)}...")
+
+        # Execute all tool calls
+        messages.append({"role": "assistant", "content": response.content})
+        tool_results = []
+
+        for tc in tool_calls:
+            try:
+                result = TOOL_MAP[tc.name](**tc.input)
+            except Exception as e:
+                result = {"error": str(e)}
+            tool_results.append({
+                "type":        "tool_result",
+                "tool_use_id": tc.id,
+                "content":     json.dumps(result),
+            })
+
+        messages.append({"role": "user", "content": tool_results})
+
+
+# ── CLI for testing ────────────────────────────────────────────────────────────
+if __name__ == "__main__":
+    print("\nSecond Brain — type your question (Ctrl+C to quit)\n")
+    while True:
+        try:
+            q = input("You: ").strip()
+            if not q:
+                continue
+            print("\nThinking...", end="", flush=True)
+            answer = run(q, on_status=lambda s: print(f"\r{s}", end="", flush=True))
+            print(f"\r\nBrain: {answer}\n")
+        except KeyboardInterrupt:
+            print("\nBye.")
+            break

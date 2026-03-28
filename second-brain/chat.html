@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<title>Second Brain</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: #0a0a0a;
+    color: #e5e5e5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    padding: 16px;
+    border-bottom: 1px solid #1f1f1f;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  header .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+  }
+
+  header h1 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #ccc;
+  }
+
+  header .sub {
+    font-size: 11px;
+    color: #444;
+    margin-left: auto;
+  }
+
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .msg {
+    max-width: 88%;
+    line-height: 1.55;
+    font-size: 14px;
+  }
+
+  .msg.you {
+    align-self: flex-end;
+    background: #1d3a5c;
+    color: #e0eeff;
+    padding: 10px 14px;
+    border-radius: 18px 18px 4px 18px;
+  }
+
+  .msg.brain {
+    align-self: flex-start;
+    background: #1c1c1c;
+    color: #ddd;
+    padding: 12px 16px;
+    border-radius: 4px 18px 18px 18px;
+    white-space: pre-wrap;
+  }
+
+  .msg.brain.thinking {
+    color: #555;
+    font-style: italic;
+    background: transparent;
+    padding: 0;
+  }
+
+  .msg.brain .label {
+    font-size: 10px;
+    color: #444;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  footer {
+    padding: 12px;
+    border-top: 1px solid #1a1a1a;
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    background: #0a0a0a;
+  }
+
+  textarea {
+    flex: 1;
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    color: #e5e5e5;
+    font-size: 14px;
+    font-family: inherit;
+    padding: 10px 14px;
+    resize: none;
+    height: 44px;
+    max-height: 120px;
+    outline: none;
+    line-height: 1.4;
+  }
+
+  textarea:focus { border-color: #3a3a3a; }
+
+  button {
+    background: #2563eb;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 18px;
+    width: 44px;
+    height: 44px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  button:active { background: #1d4ed8; transform: scale(0.95); }
+  button:disabled { background: #1a1a1a; color: #333; cursor: default; transform: none; }
+
+  .hint {
+    text-align: center;
+    color: #2a2a2a;
+    font-size: 12px;
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="dot"></div>
+  <h1>Second Brain</h1>
+  <span class="sub">read-only · private</span>
+</header>
+
+<div id="chat">
+  <p class="hint">Ask about emails, tickets, or chats.<br>e.g. "Check latest email from Liz"</p>
+</div>
+
+<footer>
+  <textarea id="input" placeholder="Ask anything..." rows="1"
+    onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"
+    oninput="this.style.height='44px';this.style.height=Math.min(this.scrollHeight,120)+'px'">
+  </textarea>
+  <button id="btn" onclick="send()">↑</button>
+</footer>
+
+<script>
+  const chat  = document.getElementById('chat');
+  const input = document.getElementById('input');
+  const btn   = document.getElementById('btn');
+  let busy = false;
+
+  function addMsg(text, type) {
+    const hint = chat.querySelector('.hint');
+    if (hint) hint.remove();
+
+    const div = document.createElement('div');
+    div.className = `msg ${type}`;
+    if (type === 'brain') {
+      div.innerHTML = `<div class="label">Brain</div>${escHtml(text)}`;
+    } else {
+      div.textContent = text;
+    }
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+    return div;
+  }
+
+  function escHtml(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function send() {
+    if (busy) return;
+    const q = input.value.trim();
+    if (!q) return;
+
+    input.value = '';
+    input.style.height = '44px';
+    addMsg(q, 'you');
+
+    busy = true;
+    btn.disabled = true;
+
+    const thinking = addMsg('Investigating...', 'brain thinking');
+
+    try {
+      const res = await fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q }),
+        signal: AbortSignal.timeout(120000),  // 2 min timeout
+      });
+      const data = await res.json();
+      thinking.remove();
+      addMsg(data.ok ? data.answer : `Error: ${data.msg}`, 'brain');
+    } catch (e) {
+      thinking.remove();
+      addMsg(e.name === 'TimeoutError' ? 'Timed out — try a simpler question.' : 'Could not reach PC.', 'brain');
+    }
+
+    busy = false;
+    btn.disabled = false;
+    input.focus();
+  }
+</script>
+</body>
+</html>
