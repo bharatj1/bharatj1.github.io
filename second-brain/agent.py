@@ -1,29 +1,24 @@
 """
-Second Brain Agent
-Reads emails, Freshservice tickets, Teams chats.
+Second Brain Agent — with conversation memory.
 Read-only. Never sends, posts, or modifies anything.
 """
 
-import json
-import os
-import sys
-import datetime
+import json, os, datetime
 import anthropic
 
-# ── Config ────────────────────────────────────────────────────────────────────
 cfg_path = os.path.join(os.path.dirname(__file__), "config.json")
 with open(cfg_path) as f:
     CFG = json.load(f)
 
 client = anthropic.Anthropic(api_key=CFG["anthropic_api_key"])
 
-# ── Audit log ─────────────────────────────────────────────────────────────────
 LOG_FILE = os.path.join(os.path.dirname(__file__), "audit.log")
 
 def audit(action, detail=""):
     ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(LOG_FILE, "a") as f:
         f.write(f"[{ts}] {action}: {detail}\n")
+
 
 # ── Tool implementations ───────────────────────────────────────────────────────
 
@@ -33,7 +28,7 @@ def tool_search_emails(from_name=None, subject_contains=None, days_back=7):
     return search_emails(from_name=from_name, subject_contains=subject_contains, days_back=days_back)
 
 def tool_get_email_thread(conversation_id):
-    audit("get_email_thread", f"conv={conversation_id[:20]}...")
+    audit("get_email_thread", f"conv={str(conversation_id)[:20]}")
     from tools.outlook import get_email_thread
     return get_email_thread(conversation_id)
 
@@ -47,25 +42,19 @@ def tool_get_ticket(ticket_id):
     audit("get_ticket", f"id={ticket_id}")
     from tools.freshservice import Freshservice
     fs = Freshservice(CFG["freshservice_domain"], CFG["freshservice_api_key"])
-    ticket = fs.get_ticket(ticket_id)
-    comments = fs.get_ticket_comments(ticket_id)
-    return {"ticket": ticket, "comments": comments}
+    return {"ticket": fs.get_ticket(ticket_id), "comments": fs.get_ticket_comments(ticket_id)}
 
 def tool_search_teams_chats(person_name, days_back=7):
     audit("search_teams_chats", f"person={person_name} days={days_back}")
     from tools.teams import search_chat_messages
     results, err = search_chat_messages(person_name, days_back)
-    if err:
-        return {"error": err}
-    return results
+    return {"error": err} if err else results
 
 def tool_get_channel_messages(team_name=None, days_back=3):
     audit("get_channel_messages", f"team={team_name} days={days_back}")
     from tools.teams import get_channel_messages
     results, err = get_channel_messages(team_name, days_back)
-    if err:
-        return {"error": err}
-    return results
+    return {"error": err} if err else results
 
 
 TOOL_MAP = {
@@ -77,24 +66,22 @@ TOOL_MAP = {
     "get_channel_messages": tool_get_channel_messages,
 }
 
-# ── Tool definitions for Claude ───────────────────────────────────────────────
-
 TOOLS = [
     {
         "name": "search_emails",
-        "description": "Search Outlook inbox for emails. Use this first when user mentions a person or topic.",
+        "description": "Search Outlook inbox. Use when user mentions a person, topic, or wants recent emails.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "from_name":        {"type": "string", "description": "Sender name or email (partial ok)"},
-                "subject_contains": {"type": "string", "description": "Keyword in subject"},
-                "days_back":        {"type": "integer", "description": "How many days back to search (default 7)"},
+                "from_name":        {"type": "string",  "description": "Sender name or email (partial ok)"},
+                "subject_contains": {"type": "string",  "description": "Keyword in subject line"},
+                "days_back":        {"type": "integer", "description": "Days back to search (default 7)"},
             },
         },
     },
     {
         "name": "get_email_thread",
-        "description": "Get the full email conversation thread by conversation_id from search_emails result.",
+        "description": "Get the full conversation thread for an email using its conversation_id.",
         "input_schema": {
             "type": "object",
             "required": ["conversation_id"],
@@ -105,23 +92,23 @@ TOOLS = [
     },
     {
         "name": "search_freshservice",
-        "description": "Search Freshservice for tickets by keyword, name, or topic.",
+        "description": "Search Freshservice helpdesk for tickets by keyword, person, or topic.",
         "input_schema": {
             "type": "object",
             "required": ["query"],
             "properties": {
-                "query": {"type": "string", "description": "Search keyword or ticket subject"},
+                "query": {"type": "string"},
             },
         },
     },
     {
         "name": "get_ticket",
-        "description": "Get full details and all comments for a Freshservice ticket by ID.",
+        "description": "Get full details and full comment history for a Freshservice ticket.",
         "input_schema": {
             "type": "object",
             "required": ["ticket_id"],
             "properties": {
-                "ticket_id": {"type": "integer", "description": "Freshservice ticket number"},
+                "ticket_id": {"type": "integer"},
             },
         },
     },
@@ -132,8 +119,8 @@ TOOLS = [
             "type": "object",
             "required": ["person_name"],
             "properties": {
-                "person_name": {"type": "string", "description": "Name of person to search chats with"},
-                "days_back":   {"type": "integer", "description": "How many days back (default 7)"},
+                "person_name": {"type": "string"},
+                "days_back":   {"type": "integer", "description": "Days back (default 7)"},
             },
         },
     },
@@ -143,14 +130,12 @@ TOOLS = [
         "input_schema": {
             "type": "object",
             "properties": {
-                "team_name": {"type": "string", "description": "Team name filter (optional)"},
-                "days_back": {"type": "integer", "description": "How many days back (default 3)"},
+                "team_name": {"type": "string", "description": "Filter by team name (optional)"},
+                "days_back": {"type": "integer", "description": "Days back (default 3)"},
             },
         },
     },
 ]
-
-# ── System prompt ──────────────────────────────────────────────────────────────
 
 SYSTEM = f"""You are the private AI assistant for Bharat Jagwani ({CFG['your_email']}), VP of Technology — responsible for enterprise IT service delivery, cybersecurity operations, automation programs, and client technology environments.
 
@@ -190,22 +175,27 @@ WHAT YOU NEVER DO:
 - Agree blindly — challenge assumptions and flag blind spots when you see them
 - Over-explain. If it can be said in fewer words without losing clarity, do it.
 
+MEMORY:
+You remember everything said earlier in this conversation. Reference it naturally.
+If the user says "that ticket" or "her email" — you know what they mean from context.
+
 PROFESSIONAL CONTEXT:
-Bharat's environment includes managed IT services, SOC operations, M365 ecosystems,
-endpoint security, cloud infrastructure, IT governance, automation and AI workflows.
-Clients are typically in financial services with high compliance requirements.
+Managed IT services, SOC operations, M365, endpoint security, cloud infrastructure,
+IT governance, automation and AI workflows. Clients in financial services with high compliance requirements.
 """
 
-# ── Main agent loop ────────────────────────────────────────────────────────────
 
-def run(user_message, on_status=None):
+def run(user_message, history=None):
     """
-    Run the agent on a user message.
-    on_status: optional callback(str) called with status updates while agent works.
-    Returns final text response.
+    Run the agent with conversation memory.
+    history: list of previous messages [{"role": ..., "content": ...}]
+    Returns (answer, updated_history)
     """
+    if history is None:
+        history = []
+
     audit("user_query", user_message[:100])
-    messages = [{"role": "user", "content": user_message}]
+    messages = history + [{"role": "user", "content": user_message}]
 
     while True:
         response = client.messages.create(
@@ -216,7 +206,6 @@ def run(user_message, on_status=None):
             messages=messages,
         )
 
-        # Collect text + tool calls from response
         text_parts = []
         tool_calls = []
 
@@ -226,18 +215,14 @@ def run(user_message, on_status=None):
             elif block.type == "tool_use":
                 tool_calls.append(block)
 
-        # If no tool calls, we're done
         if not tool_calls:
             final = " ".join(text_parts).strip()
             audit("agent_response", final[:100])
-            return final
+            # Save to history (keep last 20 exchanges to avoid token bloat)
+            messages.append({"role": "assistant", "content": final})
+            trimmed = messages[-40:] if len(messages) > 40 else messages
+            return final, trimmed
 
-        # Report status to caller
-        if on_status:
-            names = [tc.name.replace("_", " ") for tc in tool_calls]
-            on_status(f"Checking {', '.join(names)}...")
-
-        # Execute all tool calls
         messages.append({"role": "assistant", "content": response.content})
         tool_results = []
 
@@ -253,19 +238,3 @@ def run(user_message, on_status=None):
             })
 
         messages.append({"role": "user", "content": tool_results})
-
-
-# ── CLI for testing ────────────────────────────────────────────────────────────
-if __name__ == "__main__":
-    print("\nSecond Brain — type your question (Ctrl+C to quit)\n")
-    while True:
-        try:
-            q = input("You: ").strip()
-            if not q:
-                continue
-            print("\nThinking...", end="", flush=True)
-            answer = run(q, on_status=lambda s: print(f"\r{s}", end="", flush=True))
-            print(f"\r\nBrain: {answer}\n")
-        except KeyboardInterrupt:
-            print("\nBye.")
-            break

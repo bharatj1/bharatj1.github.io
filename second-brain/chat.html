@@ -20,31 +20,29 @@
   }
 
   header {
-    padding: 16px;
-    border-bottom: 1px solid #1f1f1f;
+    padding: 14px 16px;
+    border-bottom: 1px solid #1a1a1a;
     display: flex;
     align-items: center;
     gap: 10px;
     flex-shrink: 0;
   }
 
-  header .dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #22c55e;
-  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
 
-  header h1 {
-    font-size: 15px;
-    font-weight: 600;
-    color: #ccc;
-  }
+  header h1 { font-size: 15px; font-weight: 600; color: #ccc; flex: 1; }
 
-  header .sub {
+  .clear-btn {
     font-size: 11px;
     color: #444;
-    margin-left: auto;
+    background: none;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-family: inherit;
   }
+  .clear-btn:active { color: #888; border-color: #444; }
 
   #chat {
     flex: 1;
@@ -52,50 +50,47 @@
     padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
   }
 
-  .msg {
-    max-width: 88%;
-    line-height: 1.55;
-    font-size: 14px;
-  }
+  .msg { max-width: 90%; font-size: 14px; line-height: 1.55; }
 
   .msg.you {
     align-self: flex-end;
     background: #1d3a5c;
-    color: #e0eeff;
+    color: #ddeeff;
     padding: 10px 14px;
     border-radius: 18px 18px 4px 18px;
   }
 
   .msg.brain {
     align-self: flex-start;
-    background: #1c1c1c;
+    background: #1a1a1a;
     color: #ddd;
     padding: 12px 16px;
     border-radius: 4px 18px 18px 18px;
     white-space: pre-wrap;
+    word-break: break-word;
   }
 
-  .msg.brain.thinking {
-    color: #555;
-    font-style: italic;
-    background: transparent;
-    padding: 0;
-  }
-
-  .msg.brain .label {
+  .msg.brain .lbl {
     font-size: 10px;
-    color: #444;
-    margin-bottom: 6px;
+    color: #3a3a3a;
     text-transform: uppercase;
     letter-spacing: 1px;
+    margin-bottom: 6px;
   }
 
+  .msg.thinking { color: #3a3a3a; font-style: italic; background: transparent; padding: 4px 0; align-self: flex-start; font-size: 13px; }
+
+  .tile.success .status { color: #4ade80; }
+  .tile.error   .status { color: #f87171; }
+
+  .hint { text-align: center; color: #252525; font-size: 12px; margin: auto; line-height: 2; }
+
   footer {
-    padding: 12px;
-    border-top: 1px solid #1a1a1a;
+    padding: 10px 12px;
+    border-top: 1px solid #161616;
     display: flex;
     gap: 8px;
     flex-shrink: 0;
@@ -104,46 +99,34 @@
 
   textarea {
     flex: 1;
-    background: #1a1a1a;
-    border: 1px solid #2a2a2a;
-    border-radius: 12px;
+    background: #161616;
+    border: 1px solid #252525;
+    border-radius: 14px;
     color: #e5e5e5;
     font-size: 14px;
     font-family: inherit;
     padding: 10px 14px;
     resize: none;
     height: 44px;
-    max-height: 120px;
+    max-height: 140px;
     outline: none;
     line-height: 1.4;
   }
+  textarea:focus { border-color: #333; }
 
-  textarea:focus { border-color: #3a3a3a; }
-
-  button {
+  button.send {
     background: #2563eb;
     border: none;
-    border-radius: 12px;
+    border-radius: 14px;
     color: white;
-    font-size: 18px;
+    font-size: 20px;
     width: 44px;
     height: 44px;
     cursor: pointer;
     flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
-
-  button:active { background: #1d4ed8; transform: scale(0.95); }
-  button:disabled { background: #1a1a1a; color: #333; cursor: default; transform: none; }
-
-  .hint {
-    text-align: center;
-    color: #2a2a2a;
-    font-size: 12px;
-    margin-top: 40px;
-  }
+  button.send:active { background: #1d4ed8; transform: scale(0.93); }
+  button.send:disabled { background: #161616; color: #2a2a2a; }
 </style>
 </head>
 <body>
@@ -151,79 +134,103 @@
 <header>
   <div class="dot"></div>
   <h1>Second Brain</h1>
-  <span class="sub">read-only · private</span>
+  <button class="clear-btn" onclick="newSession()">New chat</button>
 </header>
 
 <div id="chat">
-  <p class="hint">Ask about emails, tickets, or chats.<br>e.g. "Check latest email from Liz"</p>
+  <div class="hint">
+    What do you need to know?<br>
+    Emails · Tickets · Teams · Drafts
+  </div>
 </div>
 
 <footer>
-  <textarea id="input" placeholder="Ask anything..." rows="1"
+  <textarea id="inp" placeholder="Ask anything..." rows="1"
     onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send()}"
-    oninput="this.style.height='44px';this.style.height=Math.min(this.scrollHeight,120)+'px'">
-  </textarea>
-  <button id="btn" onclick="send()">↑</button>
+    oninput="autosize(this)"></textarea>
+  <button class="send" id="btn" onclick="send()">↑</button>
 </footer>
 
 <script>
-  const chat  = document.getElementById('chat');
-  const input = document.getElementById('input');
-  const btn   = document.getElementById('btn');
+  let sessionId = null;
   let busy = false;
 
-  function addMsg(text, type) {
-    const hint = chat.querySelector('.hint');
-    if (hint) hint.remove();
-
-    const div = document.createElement('div');
-    div.className = `msg ${type}`;
-    if (type === 'brain') {
-      div.innerHTML = `<div class="label">Brain</div>${escHtml(text)}`;
-    } else {
-      div.textContent = text;
+  // Init session on load
+  async function initSession() {
+    try {
+      const r = await fetch('/new_session');
+      const d = await r.json();
+      sessionId = d.session_id;
+    } catch(e) {
+      sessionId = 'default';
     }
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-    return div;
+  }
+  initSession();
+
+  function autosize(el) {
+    el.style.height = '44px';
+    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
   }
 
-  function escHtml(t) {
-    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  function addMsg(text, type) {
+    document.querySelector('.hint')?.remove();
+    const d = document.createElement('div');
+    d.className = 'msg ' + type;
+    if (type === 'brain') {
+      d.innerHTML = `<div class="lbl">Brain</div>${esc(text)}`;
+    } else if (type === 'thinking') {
+      d.textContent = text;
+    } else {
+      d.textContent = text;
+    }
+    document.getElementById('chat').appendChild(d);
+    d.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    return d;
+  }
+
+  function esc(t) {
+    return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   }
 
   async function send() {
     if (busy) return;
-    const q = input.value.trim();
+    const inp = document.getElementById('inp');
+    const q = inp.value.trim();
     if (!q) return;
 
-    input.value = '';
-    input.style.height = '44px';
+    inp.value = '';
+    inp.style.height = '44px';
     addMsg(q, 'you');
 
     busy = true;
-    btn.disabled = true;
+    document.getElementById('btn').disabled = true;
 
-    const thinking = addMsg('Investigating...', 'brain thinking');
+    const thinking = addMsg('Checking sources...', 'thinking');
 
     try {
       const res = await fetch('/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ q }),
-        signal: AbortSignal.timeout(120000),  // 2 min timeout
+        body: JSON.stringify({ q, session_id: sessionId }),
+        signal: AbortSignal.timeout(120000),
       });
       const data = await res.json();
       thinking.remove();
-      addMsg(data.ok ? data.answer : `Error: ${data.msg}`, 'brain');
-    } catch (e) {
+      addMsg(data.ok ? data.answer : 'Error: ' + data.msg, 'brain');
+    } catch(e) {
       thinking.remove();
-      addMsg(e.name === 'TimeoutError' ? 'Timed out — try a simpler question.' : 'Could not reach PC.', 'brain');
+      addMsg(e.name === 'TimeoutError' ? 'Timed out. Try a shorter question.' : 'Cannot reach PC.', 'brain');
     }
 
     busy = false;
-    btn.disabled = false;
-    input.focus();
+    document.getElementById('btn').disabled = false;
+    inp.focus();
+  }
+
+  async function newSession() {
+    await initSession();
+    const chat = document.getElementById('chat');
+    chat.innerHTML = '<div class="hint">What do you need to know?<br>Emails · Tickets · Teams · Drafts</div>';
   }
 </script>
 </body>
