@@ -9,6 +9,24 @@ from urllib.parse import urlparse
 import agent
 import memory as mem
 
+
+class SafeEncoder(json.JSONEncoder):
+    """Handles Anthropic SDK objects (ToolUseBlock, TextBlock, etc.) that aren't JSON serializable."""
+    def default(self, obj):
+        t = getattr(obj, "type", None)
+        if t is not None:
+            d = {"type": t}
+            for attr in ("text", "id", "name", "input"):
+                v = getattr(obj, attr, None)
+                if v is not None:
+                    d[attr] = v
+            return d
+        return str(obj)
+
+
+def _dumps(obj):
+    return json.dumps(obj, cls=SafeEncoder, ensure_ascii=False)
+
 # In-memory sessions: session_id -> list of messages
 SESSIONS = {}
 
@@ -25,8 +43,8 @@ def load_chats():
         return []
 
 def save_chats(chats):
-    with open(CHATS_FILE, "w") as f:
-        json.dump({"chats": chats}, f, indent=2)
+    with open(CHATS_FILE, "w", encoding="utf-8") as f:
+        f.write(_dumps({"chats": chats}))
 
 def upsert_chat(session_id, messages):
     """Save or update a chat. Auto-generates title from first user message."""
@@ -132,7 +150,7 @@ class Handler(BaseHTTPRequestHandler):
 
             def sse(event_type, data):
                 try:
-                    msg = f"data: {json.dumps({'type': event_type, 'msg': data}, ensure_ascii=False)}\n\n"
+                    msg = f"data: {_dumps({'type': event_type, 'msg': data})}\n\n"
                     self.wfile.write(msg.encode("utf-8"))
                     self.wfile.flush()
                 except Exception:
@@ -176,7 +194,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _json(self, status, data):
-        self._respond(status, "application/json; charset=utf-8", json.dumps(data, ensure_ascii=False).encode("utf-8"))
+        self._respond(status, "application/json; charset=utf-8", _dumps(data).encode("utf-8"))
 
 
 if __name__ == "__main__":
