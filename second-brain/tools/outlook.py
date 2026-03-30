@@ -4,7 +4,13 @@ Searches across ALL folders: Inbox, LINEDATA, GraitITSupport, Sent, etc.
 No network calls, no marks-as-read, completely invisible.
 """
 import re
+import threading
+import time
 from datetime import datetime, timedelta
+
+_FOLDER_CACHE = {"folders": None, "ts": 0}
+_FOLDER_LOCK  = threading.Lock()
+FOLDER_TTL    = 300  # 5 minutes
 
 
 def _get_ns():
@@ -13,31 +19,40 @@ def _get_ns():
 
 
 def _get_all_folders(ns):
-    """Recursively collect all mail folders across all stores."""
-    folders = []
+    """Recursively collect all mail folders. Cached for 5 minutes."""
+    now = time.time()
+    if _FOLDER_CACHE["folders"] and (now - _FOLDER_CACHE["ts"]) < FOLDER_TTL:
+        return _FOLDER_CACHE["folders"]
 
-    def recurse(folder):
-        try:
-            # Only include folders that contain mail items
-            if folder.DefaultItemType == 0:  # 0 = olMailItem
-                folders.append(folder)
-            for i in range(folder.Folders.Count):
-                try:
-                    recurse(folder.Folders.Item(i + 1))
-                except Exception:
-                    continue
-        except Exception:
-            pass
+    with _FOLDER_LOCK:
+        # Double-check after acquiring lock
+        if _FOLDER_CACHE["folders"] and (time.time() - _FOLDER_CACHE["ts"]) < FOLDER_TTL:
+            return _FOLDER_CACHE["folders"]
 
-    for i in range(ns.Stores.Count):
-        try:
-            store = ns.Stores.Item(i + 1)
-            root = store.GetRootFolder()
-            recurse(root)
-        except Exception:
-            continue
+        folders = []
 
-    return folders
+        def recurse(folder):
+            try:
+                if folder.DefaultItemType == 0:  # olMailItem
+                    folders.append(folder)
+                for i in range(folder.Folders.Count):
+                    try:
+                        recurse(folder.Folders.Item(i + 1))
+                    except Exception:
+                        continue
+            except Exception:
+                pass
+
+        for i in range(ns.Stores.Count):
+            try:
+                store = ns.Stores.Item(i + 1)
+                recurse(store.GetRootFolder())
+            except Exception:
+                continue
+
+        _FOLDER_CACHE["folders"] = folders
+        _FOLDER_CACHE["ts"] = time.time()
+        return folders
 
 
 def list_folders():

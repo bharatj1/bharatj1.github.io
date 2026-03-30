@@ -3,7 +3,7 @@ Second Brain Agent — with conversation memory.
 Read-only. Never sends, posts, or modifies anything.
 """
 
-import json, os, datetime
+import json, os, datetime, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import anthropic
 import memory as mem
@@ -15,6 +15,15 @@ with open(cfg_path) as f:
 client = anthropic.Anthropic(api_key=CFG["anthropic_api_key"])
 
 LOG_FILE = os.path.join(os.path.dirname(__file__), "audit.log")
+
+# ── Models ─────────────────────────────────────────────────────────────────────
+# Sonnet: fast + cheap for tool selection rounds
+# Opus: best quality for final answer composition only
+TOOL_MODEL   = "claude-sonnet-4-6"
+ANSWER_MODEL = "claude-opus-4-6"
+
+# ── System prompt cache (60s TTL — avoids disk read on every Claude call) ──────
+_SYS_CACHE = {"text": None, "ts": 0}
 
 def audit(action, detail=""):
     ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -203,6 +212,10 @@ EMAIL FOLDER STRUCTURE:
 
 Never mention GraitITSupport or Alerts folders in responses unless the user specifically asks about them.
 
+TOOL USAGE — SPEED RULE:
+When a question requires multiple sources (emails + tickets + Teams), call ALL tools in a single response.
+Never call tools one at a time in separate rounds — always batch everything needed into one tool call block.
+
 PROFESSIONAL CONTEXT:
 Managed IT services, SOC operations, M365, endpoint security, cloud infrastructure,
 IT governance, automation and AI workflows. Clients in financial services with high compliance requirements.
@@ -210,9 +223,14 @@ IT governance, automation and AI workflows. Clients in financial services with h
 
 
 def build_system():
-    """Build system prompt with current persistent memory injected."""
+    """Build system prompt with persistent memory. Cached 60s to avoid disk reads on every Claude call."""
+    now = time.time()
+    if _SYS_CACHE["text"] and (now - _SYS_CACHE["ts"]) < 60:
+        return _SYS_CACHE["text"]
     memory_block = mem.format_memory_for_prompt(mem.load_memory())
-    return SYSTEM + memory_block
+    _SYS_CACHE["text"] = SYSTEM + memory_block
+    _SYS_CACHE["ts"] = now
+    return _SYS_CACHE["text"]
 
 
 TOOL_STATUS = {
@@ -319,12 +337,23 @@ def run(user_message, history=None, files=None, stream=None):
 
     audit("user_query", f"{user_message[:80]} [{len(files)} files]")
     user_content = build_user_content(user_message, files)
-    messages = history + [{"role": "user", "content": user_content}]
+    messages = history[-20:] + [{"role": "user", "content": user_content}]
 
     while True:
+        # Use fast Sonnet for tool selection, Opus only when composing the final answer
+        last = messages[-1] if messages else {}
+        is_answer_round = (
+            last.get("role") == "user" and
+            isinstance(last.get("content"), list) and
+            any(isinstance(b, dict) and b.get("type") == "tool_result"
+                for b in last.get("content", []))
+        )
+        model   = ANSWER_MODEL if is_answer_round else TOOL_MODEL
+        max_tok = 4096         if is_answer_round else 1024
+
         response = client.messages.create(
-            model="claude-opus-4-6",
-            max_tokens=4096,
+            model=model,
+            max_tokens=max_tok,
             system=build_system(),
             tools=TOOLS,
             messages=messages,
@@ -360,7 +389,7 @@ def run(user_message, history=None, files=None, stream=None):
                     else:
                         cleaned.append(block)
                 return {**m, "content": cleaned}
-            trimmed = [clean_msg(m) for m in messages[-40:]]
+            trimmed = [clean_msg(m) for m in messages[-20:]]
             return final, trimmed
 
         messages.append({"role": "assistant", "content": _serialize_blocks(response.content)})
