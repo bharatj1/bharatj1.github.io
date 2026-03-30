@@ -365,7 +365,16 @@ def run(user_message, history=None, files=None, stream=None):
 
         tool_results_map = {}
 
+        def _com_init():
+            """Initialize Windows COM on each worker thread (required for Outlook)."""
+            try:
+                import pythoncom
+                pythoncom.CoInitialize()
+            except Exception:
+                pass
+
         def run_tool(tc):
+            _com_init()
             try:
                 result = TOOL_MAP[tc.name](**tc.input)
                 return tc.id, result, None
