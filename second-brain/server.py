@@ -113,7 +113,7 @@ class Handler(BaseHTTPRequestHandler):
             body   = json.loads(self.rfile.read(length))
             question   = body.get("q", "").strip()
             session_id = body.get("session_id", "default")
-            files      = body.get("files", [])  # [{name, mime, data (base64)}]
+            files      = body.get("files", [])
 
             if not question and not files:
                 self._json(400, {"ok": False, "msg": "Empty message"})
@@ -123,18 +123,38 @@ class Handler(BaseHTTPRequestHandler):
                 saved = next((c for c in load_chats() if c["id"] == session_id), None)
                 SESSIONS[session_id] = saved["messages"] if saved else []
 
+            # SSE streaming response
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+
+            def sse(event_type, data):
+                try:
+                    msg = f"data: {json.dumps({'type': event_type, 'msg': data}, ensure_ascii=False)}\n\n"
+                    self.wfile.write(msg.encode("utf-8"))
+                    self.wfile.flush()
+                except Exception:
+                    pass
+
             try:
-                answer, updated_history = agent.run(question, SESSIONS[session_id], files)
+                answer, updated_history = agent.run(
+                    question,
+                    SESSIONS[session_id],
+                    files,
+                    stream=lambda s: sse("status", s)
+                )
                 SESSIONS[session_id] = updated_history
                 upsert_chat(session_id, updated_history)
-                self._json(200, {"ok": True, "answer": answer})
+                sse("answer", answer)
                 threading.Thread(
                     target=mem.extract_and_save,
                     args=(updated_history, agent.CFG["anthropic_api_key"]),
                     daemon=True
                 ).start()
             except Exception as e:
-                self._json(500, {"ok": False, "msg": str(e)})
+                sse("error", str(e))
         else:
             self._json(404, {"ok": False, "msg": "Not found"})
 
@@ -146,6 +166,8 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def _respond(self, status, ct, body):
+        if isinstance(body, str):
+            body = body.encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", ct)
         self.send_header("Content-Length", len(body))
@@ -154,7 +176,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _json(self, status, data):
-        self._respond(status, "application/json", json.dumps(data).encode())
+        self._respond(status, "application/json; charset=utf-8", json.dumps(data, ensure_ascii=False).encode("utf-8"))
 
 
 if __name__ == "__main__":

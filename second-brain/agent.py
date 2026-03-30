@@ -202,6 +202,16 @@ def build_system():
     return SYSTEM + memory_block
 
 
+TOOL_STATUS = {
+    "search_emails":        lambda a: f"Searching emails{' from ' + a['from_name'] if a.get('from_name') else ''}{' about \"' + a['subject_contains'] + '\"' if a.get('subject_contains') else ''}{' in ' + a['folder_name'] if a.get('folder_name') else ''}...",
+    "get_email_thread":     lambda a: "Reading full email thread...",
+    "search_freshservice":  lambda a: f"Searching Freshservice for \"{a.get('query', '')}\"...",
+    "get_ticket":           lambda a: f"Pulling ticket #{a.get('ticket_id', '')} and full history...",
+    "search_teams_chats":   lambda a: f"Checking Teams chats with {a.get('person_name', '')}...",
+    "get_channel_messages": lambda a: f"Reading Teams channel messages{' in ' + a['team_name'] if a.get('team_name') else ''}...",
+}
+
+
 def build_user_content(text, files):
     """
     Build Claude message content with text + optional files.
@@ -257,17 +267,22 @@ def build_user_content(text, files):
     return content
 
 
-def run(user_message, history=None, files=None):
+def run(user_message, history=None, files=None, stream=None):
     """
     Run the agent with conversation memory and optional file attachments.
     history: list of previous messages [{"role": ..., "content": ...}]
     files:   list of {name, mime, data (base64)}
+    stream:  optional callback(str) called with live status updates
     Returns (answer, updated_history)
     """
     if history is None:
         history = []
     if files is None:
         files = []
+
+    def emit(msg):
+        if stream:
+            stream(msg)
 
     audit("user_query", f"{user_message[:80]} [{len(files)} files]")
     user_content = build_user_content(user_message, files)
@@ -292,6 +307,7 @@ def run(user_message, history=None, files=None):
                 tool_calls.append(block)
 
         if not tool_calls:
+            emit("Composing answer...")
             final = " ".join(text_parts).strip()
             audit("agent_response", final[:100])
             messages.append({"role": "assistant", "content": final})
@@ -313,8 +329,15 @@ def run(user_message, history=None, files=None):
         tool_results = []
 
         for tc in tool_calls:
+            status_msg = TOOL_STATUS.get(tc.name, lambda a: f"{tc.name.replace('_',' ')}...")(tc.input)
+            emit(status_msg)
             try:
                 result = TOOL_MAP[tc.name](**tc.input)
+                # Emit what was found
+                if isinstance(result, list):
+                    emit(f"Found {len(result)} result{'s' if len(result) != 1 else ''}.")
+                elif isinstance(result, dict) and "ticket" in result:
+                    emit(f"Got ticket details and {len(result.get('comments', []))} comments.")
             except Exception as e:
                 result = {"error": str(e)}
             tool_results.append({
