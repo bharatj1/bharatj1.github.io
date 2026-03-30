@@ -5,9 +5,11 @@ One-time login via setup_teams_brain.py
 """
 import json
 import os
+import re
 import time
 import urllib.request
 import urllib.parse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 TOKEN_FILE = os.path.join(os.path.dirname(__file__), "..", "teams_token.json")
 
@@ -130,7 +132,7 @@ def search_chat_messages(person_name, days_back=7):
 
 
 def get_channel_messages(team_name=None, days_back=3):
-    """Get recent messages from Teams channels."""
+    """Get recent messages from Teams channels. Parallel fetch, capped at 3 teams."""
     token, err = get_token()
     if not token:
         return [], err
@@ -139,19 +141,23 @@ def get_channel_messages(team_name=None, days_back=3):
     if err:
         return [], err
 
-    results = []
     cutoff = time.time() - (days_back * 86400)
+    all_teams = teams_data.get("value", [])
 
-    for team in teams_data.get("value", []):
-        if team_name and team_name.lower() not in team["displayName"].lower():
-            continue
+    if team_name:
+        all_teams = [t for t in all_teams if team_name.lower() in t["displayName"].lower()]
+    # Cap at 3 teams to keep it fast
+    all_teams = all_teams[:3]
 
+    results = []
+
+    def fetch_team(team):
+        team_results = []
         channels, err = _graph(f"/teams/{team['id']}/channels", token)
         if err or not channels:
-            continue
-
-        for ch in channels.get("value", [])[:3]:  # top 3 channels per team
-            msgs, err = _graph(f"/teams/{team['id']}/channels/{ch['id']}/messages?$top=20", token)
+            return team_results
+        for ch in channels.get("value", [])[:2]:  # top 2 channels per team
+            msgs, err = _graph(f"/teams/{team['id']}/channels/{ch['id']}/messages?$top=15", token)
             if err or not msgs:
                 continue
             for msg in msgs.get("value", []):
@@ -161,11 +167,9 @@ def get_channel_messages(team_name=None, days_back=3):
                     if ts < cutoff:
                         continue
                     sender = msg.get("from", {}).get("user", {}).get("displayName", "Unknown")
-                    body = msg.get("body", {}).get("content", "")
-                    import re
-                    body = re.sub(r"<[^>]+>", "", body).strip()
+                    body = re.sub(r"<[^>]+>", "", msg.get("body", {}).get("content", "")).strip()
                     if body and len(body) > 5:
-                        results.append({
+                        team_results.append({
                             "team":    team["displayName"],
                             "channel": ch["displayName"],
                             "from":    sender,
@@ -174,6 +178,15 @@ def get_channel_messages(team_name=None, days_back=3):
                         })
                 except Exception:
                     continue
+        return team_results
+
+    with ThreadPoolExecutor(max_workers=3) as ex:
+        futures = [ex.submit(fetch_team, t) for t in all_teams]
+        for f in as_completed(futures, timeout=20):
+            try:
+                results.extend(f.result())
+            except Exception:
+                continue
 
     results.sort(key=lambda x: x["time"], reverse=True)
     return results[:30], None

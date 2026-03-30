@@ -4,6 +4,7 @@ Read-only. Never sends, posts, or modifies anything.
 """
 
 import json, os, datetime
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import anthropic
 import memory as mem
 
@@ -170,6 +171,11 @@ WHAT YOU DO WHEN INVESTIGATING:
 - Surface: easy wins, major risks, questions leadership will ask.
 - Finish with: clear recommended next steps, prioritised.
 
+TOOL FAILURES:
+If a tool returns an error or empty results, work with what you have from other sources.
+Never say "Cannot reach PC", "I can't access", or refuse to answer because one source failed.
+Always give the best answer possible with available data. Note briefly if a source was unavailable.
+
 WHAT YOU NEVER DO:
 - Use corporate buzzwords (leveraging, synergy, cutting-edge)
 - Use em dashes
@@ -317,8 +323,13 @@ def run(user_message, history=None, files=None, stream=None):
                     return m
                 cleaned = []
                 for block in m["content"]:
-                    if block.get("type") in ("image", "document"):
-                        cleaned.append({"type": "text", "text": f"[{block['type']} attachment]"})
+                    # Handle both dicts and Anthropic SDK objects (ToolUseBlock, etc.)
+                    if isinstance(block, dict):
+                        btype = block.get("type")
+                    else:
+                        btype = getattr(block, "type", None)
+                    if btype in ("image", "document"):
+                        cleaned.append({"type": "text", "text": f"[{btype} attachment]"})
                     else:
                         cleaned.append(block)
                 return {**m, "content": cleaned}
@@ -326,24 +337,40 @@ def run(user_message, history=None, files=None, stream=None):
             return final, trimmed
 
         messages.append({"role": "assistant", "content": response.content})
-        tool_results = []
 
+        # Emit all status messages upfront, then run tools in parallel
         for tc in tool_calls:
             status_msg = TOOL_STATUS.get(tc.name, lambda a: f"{tc.name.replace('_',' ')}...")(tc.input)
             emit(status_msg)
+
+        tool_results_map = {}
+
+        def run_tool(tc):
             try:
                 result = TOOL_MAP[tc.name](**tc.input)
-                # Emit what was found
-                if isinstance(result, list):
+                return tc.id, result, None
+            except Exception as e:
+                return tc.id, {"error": str(e)}, str(e)
+
+        with ThreadPoolExecutor(max_workers=len(tool_calls)) as ex:
+            futures = {ex.submit(run_tool, tc): tc for tc in tool_calls}
+            for future in as_completed(futures):
+                tool_id, result, err = future.result()
+                tool_results_map[tool_id] = result
+                if err:
+                    emit(f"Source unavailable: {err[:60]}")
+                elif isinstance(result, list):
                     emit(f"Found {len(result)} result{'s' if len(result) != 1 else ''}.")
                 elif isinstance(result, dict) and "ticket" in result:
                     emit(f"Got ticket details and {len(result.get('comments', []))} comments.")
-            except Exception as e:
-                result = {"error": str(e)}
-            tool_results.append({
+
+        tool_results = [
+            {
                 "type":        "tool_result",
                 "tool_use_id": tc.id,
-                "content":     json.dumps(result),
-            })
+                "content":     json.dumps(tool_results_map.get(tc.id, {"error": "no result"})),
+            }
+            for tc in tool_calls
+        ]
 
         messages.append({"role": "user", "content": tool_results})
