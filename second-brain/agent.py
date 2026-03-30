@@ -273,6 +273,26 @@ def build_user_content(text, files):
     return content
 
 
+def _serialize_blocks(content):
+    """Convert Anthropic SDK content blocks to plain JSON-serializable dicts."""
+    if isinstance(content, str):
+        return content
+    if not isinstance(content, list):
+        return content
+    out = []
+    for block in content:
+        if isinstance(block, dict):
+            out.append(block)
+        elif hasattr(block, "type"):
+            if block.type == "text":
+                out.append({"type": "text", "text": block.text})
+            elif block.type == "tool_use":
+                out.append({"type": "tool_use", "id": block.id, "name": block.name, "input": block.input})
+            else:
+                out.append({"type": block.type})
+    return out
+
+
 def run(user_message, history=None, files=None, stream=None):
     """
     Run the agent with conversation memory and optional file attachments.
@@ -336,7 +356,7 @@ def run(user_message, history=None, files=None, stream=None):
             trimmed = [clean_msg(m) for m in messages[-40:]]
             return final, trimmed
 
-        messages.append({"role": "assistant", "content": response.content})
+        messages.append({"role": "assistant", "content": _serialize_blocks(response.content)})
 
         # Emit all status messages upfront, then run tools in parallel
         for tc in tool_calls:
