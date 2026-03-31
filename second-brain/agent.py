@@ -146,6 +146,8 @@ TOOLS = [
                 "days_back": {"type": "integer", "description": "Days back (default 3)"},
             },
         },
+        # Cache the tools list — sent on every call, 90% cheaper when cached
+        "cache_control": {"type": "ephemeral"},
     },
 ]
 
@@ -223,12 +225,22 @@ IT governance, automation and AI workflows. Clients in financial services with h
 
 
 def build_system():
-    """Build system prompt with persistent memory. Cached 60s to avoid disk reads on every Claude call."""
+    """
+    Build system prompt with persistent memory.
+    - Local cache (60s): avoids disk reads on every Claude call
+    - cache_control ephemeral: tells Anthropic to cache the tokens server-side (90% cheaper on hits)
+    """
     now = time.time()
     if _SYS_CACHE["text"] and (now - _SYS_CACHE["ts"]) < 60:
         return _SYS_CACHE["text"]
     memory_block = mem.format_memory_for_prompt(mem.load_memory())
-    _SYS_CACHE["text"] = SYSTEM + memory_block
+    _SYS_CACHE["text"] = [
+        {
+            "type": "text",
+            "text": SYSTEM + memory_block,
+            "cache_control": {"type": "ephemeral"},
+        }
+    ]
     _SYS_CACHE["ts"] = now
     return _SYS_CACHE["text"]
 
