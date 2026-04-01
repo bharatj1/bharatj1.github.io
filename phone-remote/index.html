@@ -101,7 +101,7 @@
 <h1>PC Remote</h1>
 
 <div class="grid">
-  <div class="tile" onclick="action(this, '/mute')">
+  <div class="tile" data-action="mute" onclick="action(this, '/mute')">
     <div class="icon">🔇</div>
     <div class="label">Mute</div>
     <div class="status">tap to toggle</div>
@@ -148,6 +148,21 @@
 </div>
 
 <script>
+  const muteTile = document.querySelector('[data-action="mute"]');
+
+  function applyMuteState(state) {
+    if (!muteTile) return;
+    const icon = muteTile.querySelector('.icon');
+    const st   = muteTile.querySelector('.status');
+    if (state === 'MUTED')   { icon.textContent = '🔇'; st.textContent = '🔇 Muted';   muteTile.dataset.def = '🔇 Muted'; }
+    if (state === 'UNMUTED') { icon.textContent = '🔊'; st.textContent = '🔊 Unmuted'; muteTile.dataset.def = '🔊 Unmuted'; }
+    if (state) localStorage.setItem('muteState', state);
+  }
+
+  // Restore icon on page load from localStorage, then verify from server
+  applyMuteState(localStorage.getItem('muteState'));
+  fetch('/mute/status').then(r => r.json()).then(d => applyMuteState(d.msg)).catch(() => {});
+
   async function action(tile, endpoint) {
     if (tile.classList.contains('loading')) return;
     tile.classList.remove('success', 'error');
@@ -161,14 +176,17 @@
       const data = await res.json();
       tile.classList.remove('loading');
       tile.classList.add(data.ok ? 'success' : 'error');
-      st.textContent = data.msg;
 
-      // Update mute icon based on confirmed actual state
-      if (endpoint === '/mute' && data.ok) {
-        if (data.msg === 'MUTED')   { icon.textContent = '🔇'; st.textContent = '✓ Muted'; }
-        if (data.msg === 'UNMUTED') { icon.textContent = '🔊'; st.textContent = '✓ Unmuted'; }
-        if (data.msg === 'TOGGLED') { st.textContent = '✓ Done'; }
-        tile.dataset.def = 'tap to toggle';
+      if (endpoint === '/mute') {
+        if (data.msg === 'MUTED' || data.msg === 'UNMUTED') {
+          applyMuteState(data.msg);
+        } else {
+          // TOGGLED (COM unavailable) — flip whatever is shown
+          const nowMuted = icon.textContent !== '🔊';
+          applyMuteState(nowMuted ? 'MUTED' : 'UNMUTED');
+        }
+      } else {
+        st.textContent = data.msg;
       }
     } catch (e) {
       tile.classList.remove('loading');
@@ -178,8 +196,9 @@
 
     setTimeout(() => {
       tile.classList.remove('success', 'error');
-      st.textContent = tile.dataset.def;
-    }, 4000);
+      // For mute: keep the confirmed state text, don't reset
+      if (endpoint !== '/mute') st.textContent = tile.dataset.def;
+    }, 3000);
   }
 
   function confirmAction(tile, endpoint, msg) {

@@ -25,9 +25,7 @@ def run_ps(command):
     return result.returncode == 0, result.stdout.strip() or result.stderr.strip()
 
 
-def mute_toggle():
-    """Toggle mute and read back the ACTUAL Windows state — no extra libraries needed."""
-    PS = r"""
+_MUTE_PS_DEFS = r"""
 Add-Type -TypeDefinition @"
 using System;
 using System.Runtime.InteropServices;
@@ -59,28 +57,41 @@ public interface IVol {
     void GetMute([MarshalAs(UnmanagedType.Bool)] out bool a);
 }
 "@
-try {
-    $e = New-Object DevEnumClass -as [IDevEnum]
-    $d = $null; $e.GetDefault(0, 1, [ref]$d)
-    $o = $null; $g = [Guid]"5CDF2C82-841E-4546-9722-0CF74078229A"
-    $d.Act($g, 23, [IntPtr]::Zero, [ref]$o)
-    $v = $o -as [IVol]
-    $m = $false; $v.GetMute([ref]$m)
-    $v.SetMute(-not $m, [IntPtr]::Zero)
-    $m2 = $false; $v.GetMute([ref]$m2)
-    if ($m2) { "MUTED" } else { "UNMUTED" }
-} catch { "ERROR: $_" }
+$e = New-Object DevEnumClass -as [IDevEnum]
+$d = $null; $e.GetDefault(0, 1, [ref]$d)
+$o = $null; $g = [Guid]"5CDF2C82-841E-4546-9722-0CF74078229A"
+$d.Act($g, 23, [IntPtr]::Zero, [ref]$o)
+$v = $o -as [IVol]
 """
-    ok, output = run_ps(PS)
+
+
+def _read_mute():
+    """Read current mute state from Windows. Returns 'MUTED', 'UNMUTED', or ''."""
+    ok, output = run_ps(_MUTE_PS_DEFS + r"""
+$m = $false; $v.GetMute([ref]$m)
+if ($m) { "MUTED" } else { "UNMUTED" }
+""")
+    return output.strip()
+
+
+def mute_toggle():
+    ok, output = run_ps(_MUTE_PS_DEFS + r"""
+$m = $false; $v.GetMute([ref]$m)
+$v.SetMute(-not $m, [IntPtr]::Zero)
+$m2 = $false; $v.GetMute([ref]$m2)
+if ($m2) { "MUTED" } else { "UNMUTED" }
+""")
     output = output.strip()
-    if output == "MUTED":
-        return True, "MUTED"
-    elif output == "UNMUTED":
-        return True, "UNMUTED"
-    else:
-        # COM script failed — fall back to keyboard key and show the error
-        run_ps("(New-Object -ComObject WScript.Shell).SendKeys([char]173)")
-        return False, (output[:100] if output else "PS returned nothing")
+    if output in ("MUTED", "UNMUTED"):
+        return True, output
+    # COM failed — fall back to keyboard key, flip unknown
+    run_ps("(New-Object -ComObject WScript.Shell).SendKeys([char]173)")
+    return True, "TOGGLED"
+
+
+def get_mute_status():
+    state = _read_mute()
+    return True, state if state in ("MUTED", "UNMUTED") else "UNKNOWN"
 
 
 def sleep_pc():
@@ -181,6 +192,7 @@ def set_teams_status(availability):
 
 ACTIONS = {
     "/mute":             mute_toggle,
+    "/mute/status":      get_mute_status,
     "/sleep":            sleep_pc,
     "/reboot":           reboot_pc,
     "/teams/available":  lambda: set_teams_status("Available"),
