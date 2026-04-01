@@ -84,8 +84,17 @@ if ($m2) { "MUTED" } else { "UNMUTED" }
     output = output.strip()
     if output in ("MUTED", "UNMUTED"):
         return True, output
-    # COM failed — fall back to keyboard key, flip unknown
-    run_ps("(New-Object -ComObject WScript.Shell).SendKeys([char]173)")
+    # COM failed — use keybd_event (works from elevated process, bypasses UIPI)
+    run_ps(r"""
+Add-Type -TypeDefinition @"
+using System; using System.Runtime.InteropServices;
+public class MK {
+    [DllImport("user32.dll")] public static extern void keybd_event(byte vk, byte scan, int flags, IntPtr extra);
+    public static void Mute() { keybd_event(0xAD,0,0,IntPtr.Zero); keybd_event(0xAD,0,2,IntPtr.Zero); }
+}
+"@
+[MK]::Mute()
+""")
     return True, "TOGGLED"
 
 
