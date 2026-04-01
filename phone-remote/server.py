@@ -26,21 +26,61 @@ def run_ps(command):
 
 
 def mute_toggle():
-    """Toggle mute and read back the ACTUAL state to confirm."""
-    try:
-        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-        from comtypes import CLSCTX_ALL
-        devices = AudioUtilities.GetSpeakers()
-        interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-        vol = interface.QueryInterface(IAudioEndpointVolume)
-        vol.SetMute(not vol.GetMute(), None)
-        is_muted = vol.GetMute()  # read actual state back
-        return True, "🔇 Confirmed muted" if is_muted else "🔊 Confirmed unmuted"
-    except ImportError:
-        ok, _ = run_ps("(New-Object -ComObject WScript.Shell).SendKeys([char]173)")
-        return ok, "Toggled — run: pip install pycaw comtypes for confirmation"
-    except Exception as e:
-        return False, str(e)
+    """Toggle mute and read back the ACTUAL Windows state — no extra libraries needed."""
+    PS = r"""
+Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+[ComImport, Guid("BCDE0395-E52F-467C-8E3D-C4579291692E")]
+[ClassInterface(ClassInterfaceType.None)]
+public class DevEnumClass {}
+[Guid("A95664D2-9614-4F35-A746-DE8DB63617E6"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IDevEnum {
+    void En(int a, int b, out IntPtr c);
+    void GetDefault(int a, int b, out IDevice d);
+    void GetDev(string a, out IDevice b);
+    void Reg(IntPtr a); void Unreg(IntPtr a);
+}
+[Guid("D666063F-1587-4E43-81F1-B948E807363F"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IDevice {
+    void Act([MarshalAs(UnmanagedType.LPStruct)] Guid g, int c, IntPtr p, [MarshalAs(UnmanagedType.IUnknown)] out object o);
+    void Open(int a, out IntPtr b);
+    void GetId([MarshalAs(UnmanagedType.LPWStr)] out string a);
+    void GetSt(out int a);
+}
+[Guid("5CDF2C82-841E-4546-9722-0CF74078229A"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+public interface IVol {
+    void Reg(IntPtr a); void Unreg(IntPtr a); void GetCh(out uint a);
+    void SetVol(float a, IntPtr b); void SetVolS(float a, IntPtr b);
+    void GetVol(out float a); void GetVolS(out float a);
+    void SetChV(uint a, float b, IntPtr c); void SetChVS(uint a, float b, IntPtr c);
+    void GetChV(uint a, out float b); void GetChVS(uint a, out float b);
+    void SetMute([MarshalAs(UnmanagedType.Bool)] bool a, IntPtr b);
+    void GetMute([MarshalAs(UnmanagedType.Bool)] out bool a);
+}
+"@
+try {
+    $e = New-Object DevEnumClass -as [IDevEnum]
+    $d = $null; $e.GetDefault(0, 1, [ref]$d)
+    $o = $null; $g = [Guid]"5CDF2C82-841E-4546-9722-0CF74078229A"
+    $d.Act($g, 23, [IntPtr]::Zero, [ref]$o)
+    $v = $o -as [IVol]
+    $m = $false; $v.GetMute([ref]$m)
+    $v.SetMute(-not $m, [IntPtr]::Zero)
+    $m2 = $false; $v.GetMute([ref]$m2)
+    if ($m2) { "MUTED" } else { "UNMUTED" }
+} catch { "ERROR: $_" }
+"""
+    ok, output = run_ps(PS)
+    output = output.strip()
+    if output == "MUTED":
+        return True, "MUTED"
+    elif output == "UNMUTED":
+        return True, "UNMUTED"
+    else:
+        # fallback — keyboard key, no verification
+        run_ps("(New-Object -ComObject WScript.Shell).SendKeys([char]173)")
+        return True, "TOGGLED"
 
 
 def sleep_pc():

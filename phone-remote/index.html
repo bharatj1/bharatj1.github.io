@@ -163,10 +163,12 @@
       tile.classList.add(data.ok ? 'success' : 'error');
       st.textContent = data.msg;
 
-      // Update mute icon based on confirmed state
+      // Update mute icon based on confirmed actual state
       if (endpoint === '/mute' && data.ok) {
-        icon.textContent = data.msg.includes('muted') ? '🔇' : '🔊';
-        tile.dataset.def = st.textContent;
+        if (data.msg === 'MUTED')   { icon.textContent = '🔇'; st.textContent = '✓ Muted'; }
+        if (data.msg === 'UNMUTED') { icon.textContent = '🔊'; st.textContent = '✓ Unmuted'; }
+        if (data.msg === 'TOGGLED') { st.textContent = '✓ Done'; }
+        tile.dataset.def = 'tap to toggle';
       }
     } catch (e) {
       tile.classList.remove('loading');
