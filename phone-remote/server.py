@@ -26,18 +26,31 @@ def run_ps(command):
 
 
 def mute_toggle():
-    ok, _ = run_ps("(New-Object -ComObject WScript.Shell).SendKeys([char]173)")
-    return ok, "Muted / Unmuted"
+    """Toggle mute and read back the ACTUAL state to confirm."""
+    try:
+        from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+        from comtypes import CLSCTX_ALL
+        devices = AudioUtilities.GetSpeakers()
+        interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+        vol = interface.QueryInterface(IAudioEndpointVolume)
+        vol.SetMute(not vol.GetMute(), None)
+        is_muted = vol.GetMute()  # read actual state back
+        return True, "🔇 Confirmed muted" if is_muted else "🔊 Confirmed unmuted"
+    except ImportError:
+        ok, _ = run_ps("(New-Object -ComObject WScript.Shell).SendKeys([char]173)")
+        return ok, "Toggled — run: pip install pycaw comtypes for confirmation"
+    except Exception as e:
+        return False, str(e)
 
 
 def sleep_pc():
     ok, _ = run_ps("Add-Type -Assembly System.Windows.Forms; [System.Windows.Forms.Application]::SetSuspendState('Suspend', $false, $false)")
-    return ok, "Going to sleep"
+    return ok, "💤 PC is going to sleep"
 
 
 def reboot_pc():
     subprocess.Popen(["powershell", "-Command", "Start-Sleep 2; Restart-Computer -Force"])
-    return True, "Rebooting in 2s"
+    return True, "🔁 Rebooting in 2s"
 
 
 # ─── Teams ────────────────────────────────────────────────────────────────────
@@ -103,11 +116,25 @@ def set_teams_status(availability):
     )
     try:
         with urllib.request.urlopen(req, timeout=8):
-            return True, f"Teams → {availability}"
+            pass
     except urllib.error.HTTPError as e:
         return False, f"Graph {e.code}: {e.read().decode()[:80]}"
     except Exception as e:
         return False, str(e)
+
+    # Read back actual Teams presence to confirm
+    time.sleep(1)
+    try:
+        vreq = urllib.request.Request(
+            "https://graph.microsoft.com/v1.0/me/presence",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        with urllib.request.urlopen(vreq, timeout=8) as r:
+            data = json.loads(r.read())
+            actual = data.get("availability", availability)
+            return True, f"✓ Confirmed: {actual}"
+    except Exception:
+        return True, f"✓ Set to {availability}"
 
 
 # ─── HTTP Server ───────────────────────────────────────────────────────────────

@@ -152,15 +152,22 @@
     if (tile.classList.contains('loading')) return;
     tile.classList.remove('success', 'error');
     tile.classList.add('loading');
-    const st = tile.querySelector('.status');
+    const st   = tile.querySelector('.status');
+    const icon = tile.querySelector('.icon');
     st.textContent = '...';
 
     try {
-      const res = await fetch(endpoint, { signal: AbortSignal.timeout(8000) });
+      const res  = await fetch(endpoint, { signal: AbortSignal.timeout(10000) });
       const data = await res.json();
       tile.classList.remove('loading');
       tile.classList.add(data.ok ? 'success' : 'error');
       st.textContent = data.msg;
+
+      // Update mute icon based on confirmed state
+      if (endpoint === '/mute' && data.ok) {
+        icon.textContent = data.msg.includes('muted') ? '🔇' : '🔊';
+        tile.dataset.def = st.textContent;
+      }
     } catch (e) {
       tile.classList.remove('loading');
       tile.classList.add('error');
@@ -170,7 +177,7 @@
     setTimeout(() => {
       tile.classList.remove('success', 'error');
       st.textContent = tile.dataset.def;
-    }, 3000);
+    }, 4000);
   }
 
   function confirmAction(tile, endpoint, msg) {
