@@ -78,9 +78,9 @@ try {
     elif output == "UNMUTED":
         return True, "UNMUTED"
     else:
-        # fallback — keyboard key, no verification
+        # COM script failed — fall back to keyboard key and show the error
         run_ps("(New-Object -ComObject WScript.Shell).SendKeys([char]173)")
-        return True, "TOGGLED"
+        return False, (output[:100] if output else "PS returned nothing")
 
 
 def sleep_pc():
