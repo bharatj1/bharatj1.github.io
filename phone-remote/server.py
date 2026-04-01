@@ -75,6 +75,7 @@ if ($m) { "MUTED" } else { "UNMUTED" }
 
 
 def mute_toggle():
+    # Try verified COM toggle first
     ok, output = run_ps(_MUTE_PS_DEFS + r"""
 $m = $false; $v.GetMute([ref]$m)
 $v.SetMute(-not $m, [IntPtr]::Zero)
@@ -84,17 +85,8 @@ if ($m2) { "MUTED" } else { "UNMUTED" }
     output = output.strip()
     if output in ("MUTED", "UNMUTED"):
         return True, output
-    # COM failed — use keybd_event (works from elevated process, bypasses UIPI)
-    run_ps(r"""
-Add-Type -TypeDefinition @"
-using System; using System.Runtime.InteropServices;
-public class MK {
-    [DllImport("user32.dll")] public static extern void keybd_event(byte vk, byte scan, int flags, IntPtr extra);
-    public static void Mute() { keybd_event(0xAD,0,0,IntPtr.Zero); keybd_event(0xAD,0,2,IntPtr.Zero); }
-}
-"@
-[MK]::Mute()
-""")
+    # COM unavailable — plain keyboard key (works as regular user)
+    run_ps("(New-Object -ComObject WScript.Shell).SendKeys([char]173)")
     return True, "TOGGLED"
 
 
@@ -104,12 +96,13 @@ def get_mute_status():
 
 
 def sleep_pc():
-    ok, _ = run_ps("Add-Type -Assembly System.Windows.Forms; [System.Windows.Forms.Application]::SetSuspendState('Suspend', $false, $false)")
-    return ok, "💤 PC is going to sleep"
+    # rundll32 SetSuspendState works without admin on Windows 10/11
+    subprocess.Popen(["rundll32.exe", "powrprof.dll,SetSuspendState", "0,1,0"])
+    return True, "💤 PC is going to sleep"
 
 
 def reboot_pc():
-    subprocess.Popen(["powershell", "-Command", "Start-Sleep 2; Restart-Computer -Force"])
+    subprocess.Popen(["shutdown", "/r", "/t", "2"])
     return True, "🔁 Rebooting in 2s"
 
 

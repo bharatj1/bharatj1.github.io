@@ -4,9 +4,8 @@ echo.
 echo  Starting Phone Remote...
 echo.
 
-:: pythonw.exe = no console window, runs fully detached in background
-:: Closing this window will NOT kill the server
-powershell -Command "Start-Process 'C:\Python314\pythonw.exe' -ArgumentList 'C:\phone-remote\server.py' -Verb RunAs -WindowStyle Hidden"
+:: Run as regular user — admin not needed, and causes UIPI issues with mute/audio
+powershell -Command "Start-Process 'C:\Python314\pythonw.exe' -ArgumentList 'C:\phone-remote\server.py' -WindowStyle Hidden"
 
 :: Wait for server to come up
 timeout /t 3 /nobreak >nul
