@@ -31,21 +31,32 @@ class Freshservice:
             return {"error": str(e)}
 
     def search_tickets(self, query):
-        """Search tickets by keyword — returns list of matching tickets."""
+        """Search tickets — returns METADATA ONLY. Use get_tickets_by_ids() for full content."""
         result = self._get("/tickets", {"query": f'"{query}"', "include": "requester"})
         tickets = result.get("tickets", [])
         return [
             {
-                "id": t["id"],
-                "subject": t["subject"],
-                "status": self._status(t["status"]),
+                "id":       t["id"],
+                "subject":  t["subject"],
+                "status":   self._status(t["status"]),
                 "priority": self._priority(t["priority"]),
                 "requester": t.get("requester", {}).get("name", "Unknown"),
-                "created_at": t["created_at"],
-                "updated_at": t["updated_at"],
+                "updated":  t["updated_at"][:10],
             }
-            for t in tickets[:10]  # cap at 10
+            for t in tickets[:10]
         ]
+
+    def get_tickets_by_ids(self, ids):
+        """Fetch full ticket details + comments for a list of ticket IDs."""
+        results = []
+        for tid in ids:
+            try:
+                ticket   = self.get_ticket(tid)
+                comments = self.get_ticket_comments(tid)
+                results.append({"ticket": ticket, "comments": comments[:5]})
+            except Exception:
+                continue
+        return results
 
     def get_ticket(self, ticket_id):
         """Get full ticket details."""

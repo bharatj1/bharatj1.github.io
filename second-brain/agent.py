@@ -17,10 +17,10 @@ client = anthropic.Anthropic(api_key=CFG["anthropic_api_key"])
 LOG_FILE = os.path.join(os.path.dirname(__file__), "audit.log")
 
 # ── Models ─────────────────────────────────────────────────────────────────────
-# Sonnet: fast + cheap for tool selection rounds
-# Opus: best quality for final answer composition only
-TOOL_MODEL   = "claude-sonnet-4-6"
-ANSWER_MODEL = "claude-opus-4-6"
+TOOL_MODEL     = "claude-sonnet-4-6"
+ANSWER_MODEL   = "claude-opus-4-6"
+COMPRESS_MODEL = "claude-haiku-4-5-20251001"
+COMPRESS_CHARS = 1800  # compress tool results larger than this
 
 # ── System prompt cache (60s TTL — avoids disk read on every Claude call) ──────
 _SYS_CACHE = {"text": None, "ts": 0}
@@ -38,6 +38,12 @@ def tool_search_emails(from_name=None, subject_contains=None, days_back=7, folde
     from tools.outlook import search_emails
     return search_emails(from_name=from_name, subject_contains=subject_contains, days_back=days_back, folder_name=folder_name)
 
+def tool_get_email_details(ids):
+    """Fetch full body for specific email IDs returned by search_emails."""
+    audit("get_email_details", f"ids={ids}")
+    from tools.outlook import get_emails_by_ids
+    return get_emails_by_ids(ids)
+
 def tool_get_email_thread(conversation_id):
     audit("get_email_thread", f"conv={str(conversation_id)[:20]}")
     from tools.outlook import get_email_thread
@@ -48,6 +54,13 @@ def tool_search_freshservice(query):
     from tools.freshservice import Freshservice
     fs = Freshservice(CFG["freshservice_domain"], CFG["freshservice_api_key"])
     return fs.search_tickets(query)
+
+def tool_get_ticket_details(ids):
+    """Fetch full ticket + comments for specific ticket IDs returned by search_freshservice."""
+    audit("get_ticket_details", f"ids={ids}")
+    from tools.freshservice import Freshservice
+    fs = Freshservice(CFG["freshservice_domain"], CFG["freshservice_api_key"])
+    return fs.get_tickets_by_ids(ids)
 
 def tool_get_ticket(ticket_id):
     audit("get_ticket", f"id={ticket_id}")
@@ -70,8 +83,10 @@ def tool_get_channel_messages(team_name=None, days_back=3):
 
 TOOL_MAP = {
     "search_emails":        tool_search_emails,
+    "get_email_details":    tool_get_email_details,
     "get_email_thread":     tool_get_email_thread,
     "search_freshservice":  tool_search_freshservice,
+    "get_ticket_details":   tool_get_ticket_details,
     "get_ticket":           tool_get_ticket,
     "search_teams_chats":   tool_search_teams_chats,
     "get_channel_messages": tool_get_channel_messages,
@@ -92,8 +107,19 @@ TOOLS = [
         },
     },
     {
+        "name": "get_email_details",
+        "description": "Fetch full email body for specific emails by ID. Call this after search_emails to get content of the most relevant emails.",
+        "input_schema": {
+            "type": "object",
+            "required": ["ids"],
+            "properties": {
+                "ids": {"type": "array", "items": {"type": "string"}, "description": "List of email IDs from search_emails results"},
+            },
+        },
+    },
+    {
         "name": "get_email_thread",
-        "description": "Get the full conversation thread for an email using its conversation_id.",
+        "description": "Get the full conversation thread for an email using its conv_id.",
         "input_schema": {
             "type": "object",
             "required": ["conversation_id"],
@@ -114,8 +140,19 @@ TOOLS = [
         },
     },
     {
+        "name": "get_ticket_details",
+        "description": "Fetch full ticket content + comments for specific ticket IDs. Call this after search_freshservice to get content of the most relevant tickets.",
+        "input_schema": {
+            "type": "object",
+            "required": ["ids"],
+            "properties": {
+                "ids": {"type": "array", "items": {"type": "integer"}, "description": "List of ticket IDs from search_freshservice results"},
+            },
+        },
+    },
+    {
         "name": "get_ticket",
-        "description": "Get full details and full comment history for a Freshservice ticket.",
+        "description": "Get full details and full comment history for a single Freshservice ticket by ID.",
         "input_schema": {
             "type": "object",
             "required": ["ticket_id"],
@@ -214,9 +251,11 @@ EMAIL FOLDER STRUCTURE:
 
 Never mention GraitITSupport or Alerts folders in responses unless the user specifically asks about them.
 
-TOOL USAGE — SPEED RULE:
-When a question requires multiple sources (emails + tickets + Teams), call ALL tools in a single response.
-Never call tools one at a time in separate rounds — always batch everything needed into one tool call block.
+TOOL USAGE — TWO-STAGE PATTERN:
+1. Search tools (search_emails, search_freshservice) return metadata only — subject, sender, date, ID.
+2. After searching, pick the 3-5 most relevant IDs and call get_email_details / get_ticket_details to fetch full content.
+3. Always batch ALL searches in one response. Then batch ALL detail fetches in one response.
+4. Never fetch details for all results — only the most relevant ones for the question.
 
 PROFESSIONAL CONTEXT:
 Managed IT services, SOC operations, M365, endpoint security, cloud infrastructure,
@@ -246,13 +285,60 @@ def build_system():
 
 
 TOOL_STATUS = {
-    "search_emails":        lambda a: f"Searching emails{' from ' + a['from_name'] if a.get('from_name') else ''}{' about \"' + a['subject_contains'] + '\"' if a.get('subject_contains') else ''}{' in ' + a['folder_name'] if a.get('folder_name') else ''}...",
+    "search_emails":        lambda a: f"Searching emails{' from ' + a['from_name'] if a.get('from_name') else ''}{' about \"' + a['subject_contains'] + '\"' if a.get('subject_contains') else ''}...",
+    "get_email_details":    lambda a: f"Reading {len(a.get('ids', []))} email(s) in full...",
     "get_email_thread":     lambda a: "Reading full email thread...",
     "search_freshservice":  lambda a: f"Searching Freshservice for \"{a.get('query', '')}\"...",
-    "get_ticket":           lambda a: f"Pulling ticket #{a.get('ticket_id', '')} and full history...",
+    "get_ticket_details":   lambda a: f"Reading {len(a.get('ids', []))} ticket(s) in full...",
+    "get_ticket":           lambda a: f"Pulling ticket #{a.get('ticket_id', '')}...",
     "search_teams_chats":   lambda a: f"Checking Teams chats with {a.get('person_name', '')}...",
-    "get_channel_messages": lambda a: f"Reading Teams channel messages{' in ' + a['team_name'] if a.get('team_name') else ''}...",
+    "get_channel_messages": lambda a: f"Reading Teams channel messages...",
 }
+
+
+def _compress_result(question: str, tool_name: str, raw: str) -> str:
+    """Haiku distils a large tool result to only what's relevant to the question."""
+    try:
+        resp = client.messages.create(
+            model=COMPRESS_MODEL,
+            max_tokens=450,
+            messages=[{"role": "user", "content":
+                f"Question: {question[:200]}\n\nData from {tool_name}:\n{raw[:4000]}\n\n"
+                f"Extract ONLY the facts relevant to answering the question. "
+                f"Bullet points, no fluff, max 350 words."}]
+        )
+        return resp.content[0].text
+    except Exception:
+        return raw[:COMPRESS_CHARS]
+
+
+def _compress_history(history: list) -> list:
+    """Summarize messages older than the last 6 to keep context lean."""
+    if len(history) <= 6:
+        return history
+    old, recent = history[:-6], history[-6:]
+    lines = []
+    for m in old:
+        role    = m.get("role", "")
+        content = m.get("content", "")
+        if isinstance(content, str) and content:
+            lines.append(f"{role}: {content[:250]}")
+        elif isinstance(content, list):
+            for b in content:
+                if isinstance(b, dict) and b.get("type") == "text":
+                    lines.append(f"{role}: {b['text'][:150]}")
+    if not lines:
+        return recent
+    try:
+        resp = client.messages.create(
+            model=COMPRESS_MODEL,
+            max_tokens=120,
+            messages=[{"role": "user", "content":
+                "Summarize in 2-3 bullets (key facts only):\n" + "\n".join(lines[:20])}]
+        )
+        return [{"role": "user", "content": f"[Earlier conversation: {resp.content[0].text}]"}] + recent
+    except Exception:
+        return recent
 
 
 def build_user_content(text, files):
@@ -349,7 +435,9 @@ def run(user_message, history=None, files=None, stream=None):
 
     audit("user_query", f"{user_message[:80]} [{len(files)} files]")
     user_content = build_user_content(user_message, files)
-    messages = history[-20:] + [{"role": "user", "content": user_content}]
+    # Compress old history to reduce context size
+    history = _compress_history(history or [])
+    messages = history + [{"role": "user", "content": user_content}]
 
     while True:
         # Use fast Sonnet for tool selection, Opus only when composing the final answer
@@ -441,11 +529,24 @@ def run(user_message, history=None, files=None, stream=None):
                 elif isinstance(result, dict) and "ticket" in result:
                     emit(f"Got ticket details and {len(result.get('comments', []))} comments.")
 
+        # Compress large tool results with Haiku before they hit Opus context
+        def _prepare_content(tc):
+            raw = json.dumps(tool_results_map.get(tc.id, {"error": "no result"}), ensure_ascii=False)
+            if len(raw) > COMPRESS_CHARS:
+                emit("Distilling results...")
+                raw = _compress_result(user_message, tc.name, raw)
+            return tc.id, raw
+
+        compressed = {}
+        with ThreadPoolExecutor(max_workers=len(tool_calls)) as ex:
+            for tool_id, content in ex.map(_prepare_content, tool_calls):
+                compressed[tool_id] = content
+
         tool_results = [
             {
                 "type":        "tool_result",
                 "tool_use_id": tc.id,
-                "content":     json.dumps(tool_results_map.get(tc.id, {"error": "no result"})),
+                "content":     compressed.get(tc.id, "{}"),
             }
             for tc in tool_calls
         ]

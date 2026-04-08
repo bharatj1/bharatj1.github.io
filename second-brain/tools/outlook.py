@@ -64,82 +64,90 @@ def list_folders():
 
 def search_emails(from_name=None, subject_contains=None, days_back=7, folder_name=None):
     """
-    Search emails across folders in priority order:
-      1. LINEDATA  — manually filed work emails, highest signal
-      2. Inbox     — fresh unread emails
-      3. Sent      — outgoing mail
-      4. Others    — everything else except GraitITSupport
-      GraitITSupport is skipped by default (automated rules, low signal).
-
-    folder_name: override to search a specific folder e.g. 'GraitITSupport'
+    Search emails — returns METADATA ONLY (no body). Use get_emails_by_ids() for full content.
     """
     ns = _get_ns()
     cutoff = datetime.now() - timedelta(days=days_back)
     all_folders = _get_all_folders(ns)
 
     if folder_name:
-        # Explicit folder requested — use it directly
-        all_folders = [f for f in all_folders
-                       if folder_name.lower() in f.Name.lower()]
+        all_folders = [f for f in all_folders if folder_name.lower() in f.Name.lower()]
     else:
-        # Priority order: LINEDATA first, then Inbox, then others, skip GraitITSupport
         def folder_priority(f):
             name = f.Name.lower()
             if name == "inbox":          return 0
             if "linedata" in name:       return 1
             if "sent" in name:           return 2
-            if "graititsupport" in name: return 99  # skip unless asked
-            if "alert" in name:          return 99  # skip unless asked
+            if "graititsupport" in name: return 99
+            if "alert" in name:          return 99
             return 3
         all_folders = [f for f in all_folders if folder_priority(f) < 99]
         all_folders.sort(key=folder_priority)
 
     results = []
-
     for folder in all_folders:
-        if len(results) >= 30:
+        if len(results) >= 20:
             break
         try:
             items = folder.Items
             items.Sort("[ReceivedTime]", True)
-
             for msg in items:
-                if len(results) >= 30:
+                if len(results) >= 20:
                     break
                 try:
                     received = msg.ReceivedTime
-                    # Check date
                     recv_dt = received.replace(tzinfo=None) if hasattr(received, 'replace') else received
                     if recv_dt < cutoff:
-                        break  # Items are sorted newest first, so we can stop
-
+                        break
                     sender      = (msg.SenderName or "").lower()
                     sender_mail = (msg.SenderEmailAddress or "").lower()
                     subject     = (msg.Subject or "").lower()
-
                     if from_name and from_name.lower() not in sender \
                             and from_name.lower() not in sender_mail:
                         continue
                     if subject_contains and subject_contains.lower() not in subject:
                         continue
-
+                    # Metadata only — no body preview
                     results.append({
-                        "id":              msg.EntryID,
-                        "folder":          folder.Name,
-                        "from":            msg.SenderName or "",
-                        "from_email":      msg.SenderEmailAddress or "",
-                        "subject":         msg.Subject or "",
-                        "received":        recv_dt.strftime("%Y-%m-%d %H:%M"),
-                        "preview":         (msg.Body or "")[:300].strip(),
-                        "conversation_id": msg.ConversationID,
+                        "id":      msg.EntryID,
+                        "folder":  folder.Name,
+                        "from":    msg.SenderName or "",
+                        "subject": msg.Subject or "",
+                        "date":    recv_dt.strftime("%Y-%m-%d %H:%M"),
+                        "conv_id": msg.ConversationID,
                     })
                 except Exception:
                     continue
         except Exception:
             continue
 
-    # Sort all results by date, newest first
-    results.sort(key=lambda x: x["received"], reverse=True)
+    results.sort(key=lambda x: x["date"], reverse=True)
+    return results
+
+
+def get_emails_by_ids(ids):
+    """Fetch full email content (body) for a list of entry IDs."""
+    try:
+        import pythoncom
+        pythoncom.CoInitialize()
+    except Exception:
+        pass
+    ns = _get_ns()
+    results = []
+    for entry_id in ids:
+        try:
+            msg = ns.GetItemFromID(entry_id)
+            recv_dt = msg.ReceivedTime.replace(tzinfo=None)
+            results.append({
+                "id":      entry_id,
+                "from":    msg.SenderName or "",
+                "subject": msg.Subject or "",
+                "date":    recv_dt.strftime("%Y-%m-%d %H:%M"),
+                "body":    (msg.Body or "").strip()[:2500],
+                "conv_id": msg.ConversationID,
+            })
+        except Exception:
+            continue
     return results
 
 
